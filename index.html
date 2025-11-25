@@ -1,0 +1,1696 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sliding Control</title>
+
+  <link rel="stylesheet" href="../../dist/reset.css">
+  <link rel="stylesheet" href="../../dist/reveal.css">
+  <link rel="stylesheet" href="../../dist/theme/white.css" id="theme">
+  <link rel="stylesheet" href="../../plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="robotanim.css">
+  <link rel="stylesheet" href="../../plugin/math/katex.js">
+</head>
+
+<body>
+  <div class="slide-title">
+    <div style="display: flex; gap: 0.75rem; align-items: center">
+      <div class="robot">
+        <div class="antenna left"></div>
+        <div class="antenna right"></div>
+        <div class="leg left"></div>
+        <div class="leg right"></div>
+        <div class="arm left"></div>
+        <div class="head"></div>
+        <div class="nose"></div>
+        <div class="eye"></div>
+        <div class="body"></div>
+        <div class="arm right"></div>
+      </div>
+
+      <!-- <div style="width:1rem;height:1rem;border-radius:20%;background:rgba(11,18,32,0.9)"></div> -->
+      <div>
+        <div class="subtitle" id="slide-subtitle">##</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-info">
+    <div>
+      <div class="title">Sliding-Mode Control in Trajectory Tracking</div>
+      <div class="author">Maksim Surov</div>
+    </div>
+  </div>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <div id="goto-slide" class="goto-slide">
+        <label>Go to slide: <input type="number" id="goto-input" min="1"></label>
+        <button id="goto-ok">Go</button>
+      </div>
+
+      <section data-title="">
+        <div class="cols">
+          <div>
+            <h1>
+              Sliding-Mode Control Methodology for
+              Trajectory Tracking in Underactuated Robots
+            </h1>
+
+            <div>
+              <div style="font-size: 30pt; text-align: left; bottom: 0pt;">
+                Maksim Surov
+              </div>
+              <div style="font-size: 30pt; text-align: left">
+                Sirius University of Science and Technology
+              </div>
+              <div style="font-size: 30pt; text-align: left">
+                Sochi, Russia, 2025
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="video-frame">
+              <video src="media/butterfly-sliding-control.mp4" controls autoplay muted loop playsinline></video>
+              <div class="video-credit">
+                <b>credits:</b> Maksim Surov
+                <a href="https://youtu.be/v6cUUEJ9Aaw">youtu.be/v6cUUEJ9Aaw</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <section>
+        <h1>
+          The Butterfly Robot
+        </h1>
+      </section>
+
+      <section data-title="The Butterfly Robot">
+        <div class="cols" style="align-items: center;">
+          <div style="flex: 1.2">
+
+            <div class="comment">
+              <div class="comment-title">The Butterfly<sup>*</sup> robot</div>
+              provides a 2D simplification of the rolling manipulation problem.
+              <ul>
+                <li>Planar mechanical system: all parts move within the vertical plane. </li>
+                <li>The robot hand has 1 revolute joint, which is actuated by a DC motor. </li>
+                <li>The ball rolls freely along the hand's surface.</li>
+              </ul>
+            </div>
+
+            <div class="comment">
+              <div class="comment-title">Robot components:</div>
+              <ul>
+                <li>DC motor operating in current control mode. </li>
+                <li>Encoder measures angular position of the robot hand. </li>
+                <li>Camera measures ball Cartesian coordinates. </li>
+              </ul>
+            </div>
+
+            <div class="comment">
+              <div class="comment-title">Control objectives:</div>
+              <ul>
+                <li>Continuous quasi-periodic motion (with linear trend). </li>
+                <li>Periodic motion. </li>
+                <li>Transition between equilibrium configurations. </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="regular" style="flex: 1.08; margin: 0; padding: 0">
+            <figure class="figure">
+              <img src="media/butterfly-artwork.png"
+                   alt="Butterfly robot kinematics"
+                   style="width:100%">
+              <figcaption class="caption">
+                Figure 1. Butterfly robot
+              </figcaption>
+            </figure>
+          </div>
+
+          <div class="regular" style="flex: 1.14; margin: 0; padding: 0;">
+            <figure class="figure">
+              <img src="media/reference-trajectory.gif"
+                   alt="Reference quasi-periodic trajectory"
+                   style="width:100%">
+              <figcaption class="caption">
+                Figure 2. Robot motion example.
+              </figcaption>
+            </figure>
+
+          </div>
+
+        </div>
+
+        <div class="footnote" style="max-width: 60%">
+          * The robot was invented by K. M. Lynch, et. al. in "The roles of shape and motion in dynamic manipulation: the butterfly example,"
+          ICRA, 1998, pp. 1958-1963 vol. 3.
+        </div>
+      </section>
+
+      <section data-title="The Motion Control Problem">
+        <div class="comment" style="max-width: 60%">
+          <div class="comment-title">Motion Planning Problem: </div>
+            Find a feasible trajectory (compatible with the equations of motion) of the robot.
+        </div>
+        <div class="fragment fade-left">
+          <div class="remark" style="max-width: 60%">
+            <div class="remark-title">Trajectory Tracking Problem: </div>
+              Design a feedback control law, which forces the robot to follow the found trajectory. 
+              <br>
+          </div>
+        </div>
+      </section>
+
+      <section data-title="Robot Kinematics">
+        <div class="cols" style="align-items: center;">
+
+          <div style="flex: 1">
+            <div class="comment">
+              <b><u>Assume</u></b> ideal rolling conditions:<br>
+              <ul>
+                <li> continuous contact between the ball and the robot hand</li>
+                <li> the absence of slipping </li>
+              </ul><br>
+              Then the robot has 2 DOF. <br>
+            </div>
+
+            <div class="comment">
+              Cartesian coordinate systems:<br>
+              <ul>
+                <li>Base frame has its axis $b_{y}$ directed upward, axis $b_{x}$ directed to the right, and its origin located at the axis of the robot's revolute joint.</li>
+                <li>Frame attached to the robot link shares the same origin, and its axes $l_{x},l_{y}$ are rotated counterclockwise by the angle </li>
+              </ul>
+            </div>
+
+            <div class="comment">
+              Generalized coordinates:
+
+              <table style="margin-left: 0;">
+                <tbody>
+                  <tr>
+                    <td style="border: none">$\vartheta$</td>
+                    <td style="border: none">is the angular position of the robot hand</td>
+                  </tr>
+                  <tr>
+                    <td style="border: none">$\varphi$</td>
+                    <td style="border: none">is the polar angle defining ball position in hand's frame</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+
+          <div style="flex: 1.3">
+
+            <figure class="figure">
+              <img src="media/generalized_coordinates.svg"
+                   alt="Butterfly robot kinematics"
+                   style="width:100%; ">
+              <figcaption class="caption">
+                Figure 3. Butterfly robot kinematics
+              </figcaption>
+            </figure>
+
+          </div>
+
+          <div style="flex: 1">
+            <table class="table">
+              <thead class="theader">
+                <tr>
+                  <th style="width: 6rem;">Notation</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>$q \equiv (\vartheta, \varphi)$</td>
+                  <td>generalized coordinates</td>
+                </tr>
+                <tr>
+                  <td>$u \in \mathbb{R}$</td>
+                  <td>torque applied to the plates (control signal)</td>
+                </tr>
+                <tr>
+                  <td>$\delta(s) \in \mathbb{R}^2$</td>
+                  <td>the planar curve defining the plate's shape; $s$ is essential parameter;</td>
+                </tr>
+                <tr>
+                  <td>$\rho(\varphi) \in \mathbb{R}^2$</td>
+                  <td>the auxiliary curve displaced by $R$ from $\delta$ (equidistant curve); parametrized by the angle $\varphi$</td>
+                </tr>
+                <tr>
+                  <td>$f \equiv (f_n, f_t) $</td>
+                  <td> projection of the reaction (contact) force onto the curve's normal and tangential directions</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </section>
+
+      <section data-title="Robot Dynamics">
+        <div class="cols">
+          <div>
+            <div class="regular" style="margin-top: 2rem">
+              Euler-Lagrange equations<sup>*</sup>:
+              $$
+                M\left(q\right)\ddot{q}+C\left(q,\dot{q}\right)\dot{q}+G\left(q\right) = F u
+              $$
+              where
+              $$\begin{aligned}
+                M\left(q\right) & = m\left[\begin{array}{cc}
+                  \left\Vert \rho\right\Vert ^{2}+\frac{J_{b}+J_{p}}{m} & \rho\vee\rho'-\frac{J_{b}}{mR}\left\Vert \rho'\right\Vert \\
+                  \rho\vee\rho'-\frac{J_{b}}{mR}\left\Vert \rho'\right\Vert  & \left(1+\frac{J_{b}}{mR^{2}}\right)\left\Vert \rho'\right\Vert ^{2}
+                  \end{array}\right], \\[8pt]
+                G\left(q\right) &= mg\left[\begin{array}{c}
+                  \frac{d\varsigma\left(\vartheta\right)}{d\vartheta}\cdot\rho\\
+                  \varsigma\left(\vartheta\right)\cdot\rho'
+                  \end{array}\right], \quad
+                F = \left[\begin{array}{c}
+                  1\\
+                  0
+                  \end{array}\right], \\[8pt]
+                C\left(q,\dot{q}\right) & =m\left[\begin{array}{cc}
+                  \rho\cdot\rho'\dot{\varphi} & \rho\cdot\rho'\dot{\vartheta}+\left(\rho\vee\rho''-\frac{J_{b}}{mR}\frac{\rho'\cdot\rho''}{\left\Vert \rho'\right\Vert }\right)\dot{\varphi}\\
+                  -\rho\cdot\rho'\dot{\vartheta} & \left(1+\frac{J_{b}}{mR^{2}}\right)\rho'\cdot\rho''\dot{\varphi}
+                  \end{array}\right].
+              \end{aligned}$$
+              Model validity conditions (ideal rolling):
+              \[
+                f_n(q,\dot q, u) > 0 \quad \text{and} \quad
+                \left\vert f_t(q,\dot q, u) \right\vert < \kappa f_n(q,\dot q, u).
+              \]
+            </div>
+
+            <div class="footnote">
+              * The equation are published in M. Surov, et. al., "Case study in non-prehensile manipulation: planning and orbital stabilization of one-directional rollings for the “Butterfly” robot," 2015 ICRA, Seattle, WA, USA, 2015, pp. 1484-1489
+            </div>
+          </div>
+
+          <div>
+            <table class="table">
+              <thead class="theader">
+                <tr>
+                  <th>Notation</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    $\rho\equiv\rho\left(\varphi\right), \quad$
+                    $\rho'\equiv\frac{d\rho\left(\varphi\right)}{d\varphi}$
+                  </td>
+                  <td> omitting argument </td>
+                </tr>
+                <tr>
+                  <td> $a \vee b \equiv a_x b_y - a_y b_x$ </td>
+                  <td> the skew (pseudo-scalar) product </td>
+                </tr>
+                <tr>
+                  <td> $a \cdot b \equiv a_x b_x + a_y b_y$ </td>
+                  <td> the dot product </td>
+                </tr>
+                <tr>
+                  <td> $\left\Vert a\right\Vert  \equiv \sqrt{a \cdot a}$ </td>
+                  <td> Euclidean norm </td>
+                </tr>
+                <tr>
+                  <td> $\varsigma\left(\vartheta\right) \equiv [ \sin{\vartheta}, \cos{\vartheta}]^\top$ </td>
+                  <td> rotated unit vector </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <table class="table">
+              <thead class="theader">
+                <tr>
+                  <th>Notation</th>
+                  <th>Value, units</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>$J_{b}$</td>
+                  <td>$5.80\cdot10^{-7}\,\text{m}^{2}\text{kg}$</td>
+                  <td>inertia momentum of the ball</td>
+                </tr>
+                <tr>
+                  <td>$J_{p}$</td>
+                  <td> $8.90\cdot10^{-4}\,\text{m}^{2}\text{kg}$ </td>
+                  <td> inertia momentum of the robot link </td>
+                </tr>
+                <tr>
+                  <td>$m$</td>
+                  <td> $3.00\cdot10^{-3}\,\text{kg}$ </td>
+                  <td> mass of the ball </td>
+                </tr>
+                <tr>
+                  <td>$d$</td>
+                  <td> $2.70\cdot10^{-2}\,\text{m}$ </td>
+                  <td> distance between the plates </td>
+                </tr>
+                <tr>
+                  <td> $R_{o}$ </td>
+                  <td> $1.69\cdot10^{-2}\,\text{m}$ </td>
+                  <td> ball radius </td>
+                </tr>
+                <tr>
+                  <td>$R$</td>
+                  <td> $1.03\cdot10^{-2}\,\text{m}$ </td>
+                  <td> effective ball radius </td>
+                </tr>
+                <tr>
+                  <td> $g$ </td>
+                  <td> $9.81 \, \text{m} / \text{s}^{2}$ </td>
+                  <td> gravity acceleration </td>
+                </tr>
+                <tr>
+                  <td>$\kappa$</td>
+                  <td>$0.305$</td>
+                  <td>dry friction coefficient</td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+
+      </section>
+
+      <section data-title="Motion Planning Problem">
+        <div class="cols">
+          <div style="flex: 0.3;"> <!-- column 11 -->
+            <div class="comment" style="margin-top: 2rem">
+              <u><b>Problem:</b></u> find a quasi-periodic (with linear trend) trajectory of the Butterfly robot, satisfying
+              $$\small\begin{aligned}
+                &\, \dot{\varphi}_{*}\left(t\right)>0,\quad\varphi_{*}\left(t+T\right)=\pi+\varphi_{*}\left(t\right), \\[6pt]
+                &\, \vartheta_{*}\left(t+T\right)=\pi+\vartheta_{*}\left(t\right),\quad u_{*}\left(t\right)=u_{*}\left(t+T\right),
+              \end{aligned}$$
+              and model validity conditions.
+            </div>
+            <figure class="figure">
+              <img src="media/contact_force_at_phase_plane.svg"
+                   alt="Reference quasi-periodic trajectory"
+                   style="width:100%">
+              <figcaption class="caption">
+                Figure 4. Phase portrait of the reduced dynamics. Regions where the unilateral contact constraints become inactive are highlighted in blue (ball slipping) and red (ball detachment from the hand).
+              </figcaption>
+            </figure>
+          </div>
+          <div>
+            <div class="cols"> <!-- column 12 -->
+              <div class="regular" style="flex: 1; border-right: 2px solid rgba(150,150,150,0.95); margin-left: -1rem"> <!-- column 21 -->
+                <b>Virtual holonomic constraint</b> approach:
+                <ol>
+                  <li>
+                    Define relation between coordinates (the virtual holonomic constraint):
+                    $$\vartheta = \Theta(\varphi)$$
+                    </li>
+                  <li>
+                    If the relation holds, dynamics of the robot become:
+                    \[
+                      \alpha\left(\phi\right)\ddot{\phi}+\beta\left(\phi\right)\dot{\phi}^{2}+\gamma\left(\phi\right)=0
+                    \]
+                    where
+                    $$\small\begin{aligned}
+                      \alpha\left(\phi\right) :=& F_{\perp}M\left(\left[\begin{array}{c}
+                      \Theta\\
+                      \varphi
+                      \end{array}\right]\right)\left[\begin{array}{c}
+                      \Theta'\\
+                      1
+                      \end{array}\right] \\
+                      %
+                      \beta\left(\phi\right) :=& F_{\perp} M\left(\left[\begin{array}{c}
+                      \Theta\\
+                      \varphi
+                      \end{array}\right]\right)\left[\begin{array}{c}
+                      \Theta''\\
+                      0
+                      \end{array}\right] \\
+                      &+ F_{\perp} C\left(\left[\begin{array}{c}
+                      \Theta\\
+                      \varphi
+                      \end{array}\right],\left[\begin{array}{c}
+                      \Theta'\\
+                      1
+                      \end{array}\right]\right)\left[\begin{array}{c}
+                      \Theta'\\
+                      1
+                      \end{array}\right] \\
+                      %
+                      \gamma\left(\phi\right) :=& F_{\perp}G\left(\left[\begin{array}{c}
+                      \Theta\\
+                      \varphi
+                      \end{array}\right]\right) \\[6pt]
+                      F_{\perp} :=& [0, 1]
+                    \end{aligned}$$
+                  </li>
+                </ol>
+              </div>
+              <div class="regular" style="flex: 1; margin-left: -1rem;"> <!-- column 22 -->
+                <ol>
+                  <li value="3">
+                    Find a periodic solution $\varphi_*(t)$ of the reduced dynamics (a much simpler problem than for the original four-dimensional system). This solution defines the trajectory
+                    $$
+                      q_{*}\left(t\right)=\left[\begin{array}{c} \Theta\left(\varphi_{*}\left(t\right)\right)\\ \varphi_{*}\left(t\right) \end{array}\right].
+                    $$
+                    of the original system.
+                  </li>
+                  <li>
+                    The validity conditions for the system with an imposed virtual constraint can be expressed in terms of $\varphi, \dot\varphi$:
+                    $$\begin{aligned}
+                      &\, f_n(\varphi, \dot\varphi) > 0 \quad \text{and} \\
+                      &\, \left\vert f_t(\varphi, \dot\varphi) \right\vert < \kappa f_n(\varphi, \dot\varphi).
+                    \end{aligned}$$
+                  </li>
+                </ol>
+              </div>
+            </div>
+            <div class="footnote">
+              * This solution to the motion planning problem is published in M. Surov, et. al., "Case study in non-prehensile manipulation: planning and orbital stabilization of one-directional rollings for the “Butterfly” robot," 2015 ICRA, Seattle, WA, USA, 2015, pp. 1484-1489
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section data-title="Quasi-Periodic Trajectory">
+
+        <div class="cols" style="max-width: 100rem; margin:0 auto;">
+
+          <div style="flex: 1">
+            <div>
+              <div class="regular">
+                After one period $T=2.0918$ s, the coordinates $\varphi$ and $\vartheta$ advance by the angle $\pi$.
+                The coordinate $\varphi$ is strictly increasing, i.e., $\dot\varphi > 0$.
+              </div>
+            </div>
+
+            <figure class="figure">
+              <img src="media/reference-trajectory.gif"
+                   alt="Reference quasi-periodic trajectory"
+                   style="width:100%">
+              <figcaption class="caption">
+                Figure 5. Trajectory animation
+              </figcaption>
+            </figure>
+          </div>
+
+          <div style="flex: 1.20">
+            <figure class="figure">
+              <img src="media/reference_trajectory.svg"
+                   alt="Reference quasi-periodic trajectory"
+                   style="width:100%; ">
+              <figcaption class="caption">
+                Figure 6. Reference quasi-periodic trajectory of the robot.
+              </figcaption>
+            </figure>
+          </div>
+
+        </div>
+
+      </section>
+
+      <section>
+        <h1>
+          Trajectory orbital stabilization
+        </h1>
+      </section>
+
+      <section data-title="Trajectory Orbital Stabilization">
+        <div class="cols">
+          <div>
+            <div class="comment">
+              <div class="comment-title"> Definition: orbit </div>
+              of the trajectory $x_*(t) = (q_*(t), \dot q_*(t))$ is the set of point the trajectory passes through
+              \[
+                x_{*}=\left\{ x\in\mathbb{R}^{4}\mid x=x_{*}\left(t\right),\,t\in\mathbb{R}\right\}.
+              \]
+            </div>
+
+            <div class="comment">
+              <div class="comment-title"> Definition: tubular neighborhood </div>
+              of the orbit $x_*$ is the set
+              \[
+                U_{\varepsilon}=\left\{ x\in\mathbb{R}^{4}\mid\mathrm{dist}\left(x, x_{*}\right)<\varepsilon\right\} 
+              \]
+            </div>
+          </div>
+          <div class="fragment fade-left">
+            <div class="comment">
+              <div class="comment-title"> Definition: orbital stability </div>
+              For any $\varepsilon > 0$, there exists $\delta > 0$, s.t. any trajectory originating in $U_\delta$ remains in $U_\varepsilon$.
+              <br>
+              Asymptotic orbital stability additionally requires that any solution $x(t)$ originating in $U_\delta$ converges to the orbit
+              $$
+                \mathrm{dist}\left(x(t), x_{*}\right) \to 0 \quad \text{as} \quad t \to \infty.
+              $$
+            </div>
+            <div class="comment">
+              <div class="comment-title"> Definition: asymptotic stability </div>
+              In constrast, asymptotic stability involves
+              \[
+                \left\Vert x(t) - x_{*}(t)\right\Vert \to 0 \quad \text{as} \quad t \to \infty.
+              \]
+            </div>
+          </div>
+          <div class="fragment fade-left">
+            <div class="comment">
+              <div class="comment-title">
+                Problem:
+              </div>
+              Design a state feedback law
+              \[
+                u = u(x)
+              \]
+              for
+              \[
+                \dot x = f(x) + g(x) u, \quad x\in\mathbb{R}^4, \, u \in\mathbb{R},
+              \]
+              so that the reference trajectory $x_*(t)$ becomes a locally asymptotically orbitally stable solution of the resulting closed-loop system.
+            </div>
+          </div>
+        </div>
+        <div class="footnote" style="max-width: 60%;">
+          See, e.g., H. K. Khalil, Nonlinear Systems, 3rd Edition, 
+          Prentice Hall, Upper Saddle River, 2002. 
+        </div>
+      </section>
+
+      <section data-title="Transverse Linearization">
+        <div class="cols">
+          <div style="flex: 0.9; margin-top: 1rem;">
+            <div class="fragment fade-in-then-semi-out">
+              <div class="comment">
+                <b>New local coordinates</b> $(q,\dot q) \mapsto (\tau,\xi) \in \mathbb{R} \times \mathbb{R}^3$ within $U_\varepsilon$:
+                $$\small
+                  \tau = \tau\left(q\right)\equiv\varphi_{*}^{-1}\left(\varphi\right) \quad  \text{and} \quad
+                  \xi = \xi\left(q,\dot{q}\right)\equiv\left(\begin{array}{c}
+                    \vartheta-\Theta\left(\varphi\right)\\
+                    \dot{\vartheta}-\frac{d\Theta\left(\varphi\right)}{d\varphi}\dot{\varphi}\\
+                    \dot{\varphi}-\dot{\varphi}_{*}\left(\tau\right)
+                    \end{array}\right).
+                $$
+                <table style="margin-left: 0;">
+                  <tbody>
+                    <tr>
+                      <td style="border: none">$\tau\in\mathbb{R}$</td>
+                      <td style="border: none">is <b>projection variable</b> (time along trajectory)</td>
+                    </tr>
+                    <tr>
+                      <td style="border: none">$\xi \in \mathbb{R}^{3}$</td>
+                      <td style="border: none">are <b>transverse coordinates</b></td> 
+                    </tr>
+                  </tbody>
+                </table>
+                Requirements within $U_\varepsilon$: <br>
+                <ol>
+                  <li>Local diffeomorphism: $(q,\dot q) \simeq (\tau,\xi)$.</li>
+                  <li>Transverse coordinates vanish on the orbit: $\xi(q_*(t), \dot q_*(t)) = 0$ for all $t$.</li>
+                  <li>Projection operator satisfies: $\dot\tau = L_{\dot{q}}\tau \geq \mathrm{const} > 0$.</li>
+                </ol>
+              </div>
+            </div>
+            <div class="fragment fade-in-then-semi-out">
+              <div class="comment">
+                Dynamics in new coordinates:
+                $$\small\begin{aligned}
+                  \frac{d\tau}{dt}&=\frac{\dot{\phi}}{\dot{\phi}{}_{*}\left(\tau\right)}\\
+                  \frac{d\xi}{dt}&=\frac{\partial\xi\left(q,\dot{q}\right)}{\partial q}\dot{q}+\frac{\partial\xi\left(q,\dot{q}\right)}{\partial\dot{q}}M^{-1}\left(q\right)\left(-C\left(q,\dot{q}\right)\dot{q}-G\left(q\right)+Fu\right)
+                \end{aligned}$$
+                To achieve orbital stability, one need to design $u(\tau,\xi)$, which stabilizes $\xi = 0$.
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <div class="fragment fade-in-then-semi-out">
+              <div class="comment">
+                Partial feedback linearization [1] of $\dot \xi_2$, by introducing <b>new control</b>
+                $$\small
+                  w \equiv \frac{\partial\xi_{2}}{\partial q}\dot{q}-\frac{\partial\xi_{2}}{\partial\dot{q}}M^{-1}\left(C\dot{q}+G\right)
+                  + \frac{\partial\xi_{2}}{\partial\dot{q}}M^{-1}Fu+k_{1}\xi_{1}+k_{2}\xi_{2}
+                $$
+                where $k_1, k_2 > 0$ are control parameters. 
+              </div>
+            </div>
+            <div class="fragment fade-in-then-semi-out">
+              <div class="comment">
+                <b>Transverse dynamics</b> with new control:
+                $$\small\begin{aligned}
+                  \frac{d\xi_{1}}{d\tau}&=\frac{\dot{\phi}_{*}\left(\tau\right)}{\dot{\phi}_{*}\left(\tau\right)+\xi_{3}}\xi_{2}\\\frac{d\xi_{2}}{d\tau}&=\frac{\dot{\phi}{}_{*}\left(\tau\right)}{\dot{\phi}_{*}\left(\tau\right)+\xi_{3}}\left(w-k_{1}\xi_{1}-k_{2}\xi_{2}\right)\\\frac{d\xi_{3}}{d\tau}&=a\left(\tau\right)\xi+b\left(\tau\right)w+\left\{ \text{higher order terms in }\xi\text{ and }w\right\},
+                \end{aligned}$$
+                where $a(\tau) \in \mathbb{R}^{1\times 3}$ and $b(\tau) \in \mathbb{R}$ are $T$-periodic functions. Compact representation:
+                <br>
+                $$\small\begin{equation*}
+                  \frac{d\xi}{d\tau}=\underbrace{\left(\begin{array}{ccc}
+                  0 & 1 & 0\\
+                  -k_{1} & -k_{2} & 0\\
+                  a_{1}\left(\tau\right) & a_{2}\left(\tau\right) & a_{3}\left(\tau\right)
+                  \end{array}\right)}_{=:A\left(\tau\right)}\xi +\underbrace{\left(\begin{array}{c}
+                  0\\
+                  1\\
+                  b\left(\tau\right)
+                  \end{array}\right)}_{=:B\left(\tau\right)}w + o(\xi, w).
+                \end{equation*}$$
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footnote" style="max-width: 70%;">
+          [1] A. Shiriaev, et.al., "Constructive tool for orbital stabilization of underactuated nonlinear systems: virtual constraints approach," in IEEE TAC, vol. 50, no. 8, pp. 1164-1176, Aug. 2005.
+        </div>
+
+      </section>
+
+      <section data-title="LQR Feedback Design">
+        <div class="cols">
+          <div class="comment">
+            The problem of orbital stabilization reduces to stabilization 
+            of the trivial solution of the LTV system
+            $$\small\begin{equation*}
+              \frac{d\bar{\xi}}{d\tau}=\underbrace{\left(\begin{array}{ccc}
+              0 & 1 & 0\\
+              -k_{1} & -k_{2} & 0\\
+              a_{1}\left(\tau\right) & a_{2}\left(\tau\right) & a_{3}\left(\tau\right)
+              \end{array}\right)}_{=:A\left(\tau\right)}\bar{\xi}+\underbrace{\left(\begin{array}{c}
+              0\\
+              1\\
+              b\left(\tau\right)
+              \end{array}\right)}_{=:B\left(\tau\right)}w.
+            \end{equation*}$$
+            which is typically solved with the help of LQR for periodic LTV system [1]. 
+            <br>
+            The stabilizing feedback
+            \[
+              w\left(\tau,\bar{\xi}\right)=K\left(\tau\right)\bar{\xi}, \quad 
+              K\left(\tau\right)=-R^{-1}\left(\tau\right)B^{\top}\left(\tau\right)P\left(\tau\right)
+            \]
+            Periodic gain matrix $K(\tau)$ is computed using stabilizing solution of the matrix Riccati differential equation with periodic coefficients:
+            $$\small\begin{aligned}
+              \frac{dP}{d\tau} &= -A^{\top}\left(\tau\right)P-PA\left(\tau\right)+PB\left(\tau\right)R^{-1}\left(\tau\right)B^{\top}\left(\tau\right)P-Q\left(\tau\right), \\[10pt]
+              P(0) &= P(T) \quad \text{and} \quad P(t) \succ 0.
+            \end{aligned}$$
+          </div>
+          <div class="fragment fade-left">
+            <div class="alert">
+              The problem of solving LQR for LTV systems is computationally challenging. We can avoid solving the Riccati equation using the properties of the LTV system.
+            </div>
+          </div>
+        </div>
+        <div class="footnote" style="max-width: 50%; right: 1em;">
+          [1] V. A. Yakubovich, "A linear-quadratic optimization problem and the frequency theorem for periodic systems," Siberian Mathematical Journal, vol. 27, no. 4, pp. 181–200, 1986.
+        </div>
+      </section>
+
+      <section data-title="Linearized Dynamics Properties">
+
+        <div class="cols">
+          <div style="flex: 1.5">
+
+            <div class="remark">
+              <div class="remark-title"> Proposition: </div>
+              For any $k_{1},k_{2}>0$, the unforced $T$-periodic LTV system 
+              \[
+                \small
+                \frac{d\bar{\xi}}{d\tau}=\underbrace{\left(\begin{array}{ccc}
+                  0 & 1 & 0\\
+                  -k_{1} & -k_{2} & 0\\
+                  a_{1}\left(\tau\right) & a_{2}\left(\tau\right) & a_{3}\left(\tau\right)
+                  \end{array}\right)}_{=:A\left(\tau\right)}\bar{\xi}
+              \]
+              possesses at least two stable Floquet multipliers $\left|\mu_{1,2}\right|<1$. 
+              <br>
+              Equivalently, let $X(\tau)$ be the solution of the matrix initial-value problem
+              \[
+                \small
+                \frac{dX}{d\tau} = A(\tau) X, \quad X(0) = I_{3\times 3}, \quad \tau \in [0, T].
+              \]
+              The monodromy matrix $\Psi \equiv X(T)$ has (at least) two eigenvalues satisfying $|\mu_{1,2}| < 1$.
+            </div>
+
+            <div class="fragment fade-left">
+              <div class="remark">
+                <div class="remark-title"> Corollary: </div>
+                For any $k_{1},k_{2}>0$, the unforced system possesses a two-dimensional invariant subspace
+                \[
+                  \mathcal{S}_{\tau} \equiv \mathrm{span}\{ e_{1}(\tau), e_{2}(\tau) \}.
+                \]
+                spanned by linearly independent solutions $\bar{\xi}=e_{1}\left(\tau\right)$
+                and $\bar{\xi}=e_{2}\left(\tau\right)$, associated with the stable Floquet multipliers $\mu_1, \mu_2$, provided $\mu_1 \ne \mu_2$. Consequently, any trajectory initialized in $\mathcal{S}_{\tau_{0}}$ remains in $S_{\tau}$ for
+                all $\tau\geq\tau_{0}$ and converges exponentially to the origin as $\tau\to\infty.$ 
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="comment">
+              <div class="comment-title"> Proof: </div>
+              The monodromy matrix has the lower block-triangular form
+              \[
+                \Psi=\left(\begin{array}{cc}
+                    \exp\left(\begin{array}{cc}
+                    0 & T\\
+                    -k_{1}T & -k_{2}T
+                    \end{array}\right) & \begin{array}{c}
+                    0\\
+                    0
+                    \end{array}\\
+                    \Psi_{31}\quad\quad\quad\Psi_{32} & \Psi_{33}
+                    \end{array}\right).
+              \]
+              The spectrum of a block-triangular matrix is the union of the spectra
+              of the diagonal blocks. Hence,
+              $$
+                \mu_{1,2}=\exp\left(\frac{-k_{2}\pm\sqrt{k_{2}^{2}-4k_{1}}}{2}T\right),\quad\mu_{3}=\Psi_{33}.
+              $$
+              Since $k_{1},k_{2}>0$ and $T>0$, it follows that $\left|\mu_{1,2}\right|<1$.
+            </div>
+
+            <div class="fragment fade-left">
+              <div class="alert">
+                The system behavior inside $\mathcal{S}_\tau$ is stable. We must design a feedback law $w(\tau,\bar\xi)$ that drives every trajectory originating outside $\mathcal{S}_\tau$ into it in finite time.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <section data-title="Stable Subspace of an LTV System">
+        <div class="cols">
+          <div>
+            <!--
+            <div class="comment">
+              The feedback law 
+              \[
+                w\left(\tau, \bar\xi\right) = -\frac{n^{\top}\left(\tau\right)A\left(\tau\right)n\left(\tau\right)z+k_3\mathrm{sign}\left(z\right)}{n^{\top}\left(\tau\right)B\left(\tau\right)}
+              \]
+              requires knowledge of the function $n(\tau)$, which is defined as normalized cross product of $e_1(\tau)$ and $e_2(\tau)$.
+            </div>
+            -->
+            <div class="comment">
+              <div class="comment-title">The algorithm: </div>
+              <ol>
+                <li>
+                  Integrate the associated matrix differential equation
+                  \[
+                    \frac{d X}{d\tau} = A(\tau) X, \quad X(0) = I_{3\times3} \quad \text{for} \quad
+                    \tau \in [0, T]
+                  \]
+                  using the classical fourth-order Runge-Kutta method.
+                </li>
+                
+                <li>
+                  Since, the monodromy matrix $\Psi \equiv X(T)$ possesses two eigenvalues $\left|\mu_{1,2}\right| < 1$, three cases may occur:
+                  <ul>
+                    <li> The eigenvalues are real and distinct: $\mu_{1}, \mu_{2} \in (-1, 1)$. Then:
+                      $$
+                        e_{1} \left(\tau\right) = X\left(\tau\right) l_{1} \quad \text{and} \quad
+                        e_{2}\left(\tau\right)=X\left(\tau\right)l_{2}.
+                      $$
+                    </li>
+                    <li> The eigenvalues are complex conjugate: $\mu_1 = \mu_2^*$. Then:
+                      $$
+                        e_{1}\left(\tau\right)=X\left(\tau\right)\Re l_1 \quad \text{and} \quad
+                        e_{2}\left(\tau\right)=X\left(\tau\right)\Im l_1.
+                      $$
+                    </li>
+                    <li> The eigenvalues are real and equal: $\mu_1 = \mu_2 \in (-1, 1)$. The matrix $\Psi$ is defective, we do not consider this case.
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  The normal vector $n(\tau)$ is computed as
+                  $$
+                    n(\tau)\equiv\frac{e_{1}\left(\tau\right)\times e_{2}\left(\tau\right)}{\left\Vert e_{1}\left(\tau\right)\times e_{2}\left(\tau\right)\right\Vert }
+                  $$
+                  is either $T$-periodic or $2T$-periodic.
+                </li>
+
+              </ol>
+
+            </div>
+          </div>
+
+          <div>
+            <figure class="figure">
+              <img src="media/stable_subspace.svg"
+                   alt="Stable subspace"
+                   style="width:100%">
+              <figcaption class="caption">
+                Figure 8. Stable solutions and the normal vector $n(t)$ for feedback parameters $k_1 = 35, k_2 = 5$. Floquet multipliers: $\mu_{1,2} = 0.00117 \pm 0.00523i$ and $\mu_3 = 1.0$.
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section data-title="Theorem: Feedback Design for Partially Stabilized Periodic LTV System">
+        <div class="cols" style="margin-top: 1rem;">
+
+          <div class="theorem">
+            <p>
+              Consider the LTV system
+              \[
+                \frac{d\bar\xi}{d\tau} = A\left(\tau\right) \bar\xi + B\left(\tau\right) w
+              \]
+              where $\bar\xi \in \mathbb{R}^3$, $w \in \mathbb{R}$, and the continuous matrix functions 
+              $A(\tau) \in \mathbb{R}^{3\times3}$ and $B(\tau) \in \mathbb{R}^{3\times1}$ are $T$-periodic.
+              Assume that the unforced system
+              \[
+                \frac{d \bar\xi}{dt} = A\left(\tau\right) \bar\xi
+              \]
+              admits two solutions $\bar\xi = e_{1}\left(\tau\right)$, $\bar\xi = e_{2}\left(\tau\right)$,
+              satisfying $\lim_{\tau\to\infty}e_{i}\left(\tau\right)=0$, and that for all $\tau$
+              the vectors $e_{1}\left(\tau\right)$, $e_{2}\left(\tau\right)$ and $B\left(\tau\right)$ are linearly independent.
+              Define 
+              \[
+                z\equiv n^{\top}(\tau) \bar\xi \in\mathbb{R}, \quad \text{where} \quad
+                n(\tau)\equiv\frac{e_{1}\left(\tau\right)\times e_{2}\left(\tau\right)}{\left\Vert e_{1}\left(\tau\right)\times e_{2}\left(\tau\right)\right\Vert }\in\mathbb{R}^{3},
+              \]
+              where "$\times$" denotes the standard cross product in $\mathbb{R}^3$.
+              Then, for any $k_3>0$, the feedback control law
+              \[
+                w\left(\tau, \bar\xi\right) = -\frac{n^{\top}\left(\tau\right)A\left(\tau\right)n\left(\tau\right)z+k_3\mathrm{sign}\left(z\right)}{n^{\top}\left(\tau\right)B\left(\tau\right)},
+              \]
+              renders the origin of the closed-loop system globally asymptotically stable.
+            </p>
+          </div>
+
+          <div style="flex: 0.7">
+            <table class="table">
+              <thead class="theader">
+                <tr>
+                  <th>Notation</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    $A(\tau) \in \mathbb{R}^{3\times3}$
+                    $B(\tau) \in \mathbb{R}^{3\times1}$
+                  </td>
+                  <td> $T$-periodic matrix functions </td>
+                </tr>
+                <tr>
+                  <td> $e_1(\tau), e_2(\tau)$ </td>
+                  <td> two linearly independent stable solutions of the unforced system $\frac{d\bar\xi}{d\tau} = A(\tau) \bar \xi $ </td>
+                </tr>
+                <tr>
+                  <td> $n(\tau)$ </td>
+                  <td> a unit vector, which is orthogonal to $e_1(\tau)$ and $e_2(\tau)$ </td>
+                </tr>
+                <tr>
+                  <td> $k_3 > 0$ </td>
+                  <td> parameter of the algorithm </td>
+                </tr>
+                <tr>
+                  <td> $z = n^\top(\tau) \bar\xi$ </td>
+                  <td> sliding variable </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="comment">
+              <div class="comment-title"> Comment: </div>
+              The feedback $w(\tau,\bar\xi)$ imposes the following dynamics for $z$:
+              $$
+                \frac{dz}{d\tau} = -k_3\,\mathrm{sign}(z).
+              $$
+            </div>
+          </div>
+        </div>
+
+        <div class="footnote" style="bottom: -5rem; max-width: 60%;">
+          * Theorem is forthcoming (currently under review) in M. Surov, "Sliding-mode-based control design for the Butterfly robot," IEEE TCST.
+        </div>
+
+      </section>
+
+      <section data-title="Proof of Theorem">
+        <div class="cols">
+          <div class="comment" style="flex: 1.4">
+
+            <ol>
+              <li class="fragment fade-in-then-semi-out">
+                Show that all trajectories converge to $\mathcal{S}_t$ in finite time. Evolution of the scalar variable $z = n^{\top}\left(\tau\right)\bar\xi$, which represents the signed distance from $\bar\xi$ to $\mathcal{S}_{\tau}$, is
+                $$
+                  \frac{dz}{d\tau} = -k_3\,\mathrm{sign}(z).
+                $$
+              </li>
+
+              <li class="fragment fade-in-then-semi-out">
+                Sliding surface:
+                \[
+                  \mathcal{S}_{\tau}: z(\tau,\bar\xi) := n^\top(\tau) \bar\xi = 0.
+                \]
+                Using the equivalent control method,
+                $$
+                  w_{\mathrm{eq}} = 0 \quad \text{from} \quad \frac{dz(\tau,\bar\xi)}{d\tau} = \frac{\partial z(\tau,\bar\xi)}{\partial \tau} + \frac{\partial z(\tau,\bar\xi)}{\partial \bar\xi} \left(A(\tau) \bar\xi + B(\tau) w_\mathrm{eq}\right) = 0,
+                $$
+                yields the sliding mode dynamics:
+                \[
+                  \frac{d\bar\xi}{d\tau} = A(\tau)\bar\xi, 
+                  \quad \bar\xi \in \mathcal{S}_\tau.
+                \]
+                All trajectories of the sliding motion remain within $\mathcal{S}_{\tau}$ and converge to the origin, since they are linear combinations of the stable solutions $e_1(\tau)$ and $e_2(\tau)$.
+              </li>
+              <li class="fragment fade-in-then-semi-out">
+                Finite-time convergence to the sliding surface, impossibility of finite escape of the other variables due to linearity of the system.
+              </li>
+            </ol>
+            <br>
+          </div>
+
+          <div>
+            <figure class="figure">
+              <img src="media/invariant-subspace.svg"
+                   alt="Stable subspace"
+                   style="width:100%">
+              <figcaption class="caption">
+                Figure 7. Transient behavior schematically.
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div class="footnote" style="max-width: 60%">
+          * The full proof is forthcoming (currently under review) in M. Surov, "Sliding-Mode-Based Control Design for the Butterfly Robot," IEEE TCST.
+        </div>
+
+      </section>
+
+      <section data-title="Nonlinear Control">
+        <div class="regular" style="max-width: 80%">
+          Control law for the nonlinear system
+          <div class="math-annotated">
+            <span>
+              $$ u\left(q,\dot{q}\right)=\left(\frac{\partial\xi_{2}\left(q,\dot{q}\right)}{\partial\dot{q}}F\right)^{-1}\huge( $$
+            </span>
+            <span class="term">
+              <span class="math"> $$ -\frac{\partial\xi_{2}\left(q,\dot{q}\right)}{\partial q}\dot{q}+\frac{\partial\xi_{2}\left(q,\dot{q}\right)}{\partial\dot{q}}\left(C\left(q,\dot{q}\right)\dot{q}+G\left(q\right)\right) $$ </span>
+              <span class="label"> nonlinear terms compensation </span>
+            </span>
+            <span class="term">
+              <span class="math"> $$ + w\left(\tau,\xi\right) $$ </span>
+              <span class="label" style="bottom: -1.6em"> sliding control </span>
+            </span>
+            <span class="term">
+              <span class="math"> $$ - k_{1}\xi_{1}-k_{2}\xi_{2} $$ </span>
+              <span class="label" style="bottom: -1.6em"> VHC stabilization </span>
+            </span>
+            <span>
+              $$ \huge) $$
+            </span>
+          </div>
+          where the sliding control is
+          <div>
+            $$w\left(\tau,\xi\right) = -\frac{n^{\top}\left(\tau\right)A\left(\tau\right)n\left(\tau\right)z+k_3 \, \mathrm{sign}\left(z\right)}{n^{\top}\left(\tau\right)B\left(\tau\right)}$$
+          </div>
+          and the transformations are
+          \[
+            \tau = \varphi_{*}^{-1}\left(\varphi\right), \quad
+            \xi = \left(\begin{array}{c}
+                  \vartheta-\Theta\left(\varphi\right)\\
+                  \dot{\vartheta}-\frac{d\Theta\left(\varphi\right)}{d\varphi}\dot{\varphi}\\
+                  \dot{\varphi}-\dot{\varphi}_{*}\left(\tau\right)
+                  \end{array}\right), \quad
+            z = n^\top(\tau) \xi.
+          \]
+          The design parameters $k_1, k_2, k_3 > 0$.
+        </div>
+
+      </section>
+
+      <section data-title="Experimental Results" data-background-gradient="radial-gradient(0, #333)">
+        <div class="video-frame">
+          <video src="media/butterfly-sliding-control.mp4" controls autoplay muted loop playsinline class="video">
+          </video>
+          <div class="video-credit">
+            <b>credits:</b> Maksim Surov
+            <a href="https://youtu.be/v6cUUEJ9Aaw">youtu.be/v6cUUEJ9Aaw</a>
+          </div>
+        </div>
+      </section>
+
+      <section data-title="Experimental Results">
+        <div class="cols">
+          <div style="flex: 0.72;">
+            <figure class="figure">
+              <img src="media/transient.svg"
+                   alt="Stable subspace"
+                   style="width: 100%;">
+              <figcaption class="caption">
+                Figure 9. Transverse coordinates $\xi$, control signal $u$ and reaction force $f$.
+              </figcaption>
+            </figure>
+          </div>
+          <div>
+            <figure class="figure">
+              <img src="media/trajectory_tracking.svg"
+                   alt="Stable subspace"
+                   style="width:100%">
+              <figcaption class="caption">
+                Figure 10. Generalized coordinates $\vartheta, \varphi$ and generalized velocities $\dot\vartheta, \dot\varphi$.
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section data-title="Remark: Assumption of Linear Independence">
+        <div class="cols">
+
+          <div style="flex: 0.8">
+            <div class="remark">
+              <div class="remark-title" style="font-size: 26pt">Remark:</div>
+              For the LTV system 
+              \[
+                \frac{d\bar\xi}{d\tau} = A\left(\tau\right) \bar\xi + B\left(\tau\right) w
+              \]
+              we have made assumption that 
+              \[
+                n^\top(\tau) B(\tau) \ne 0
+              \]
+              (or, equivalently, on linear independence of the vectors $e_1(\tau),$ $e_2(\tau)$ and $B(\tau)$ for all $\tau$).
+              <br>
+              For certain trajectories and specific choices of the gains $k_1$ and $k_2$, the requirement may fail at isolated points (or over some intervals), indicating that the control vector field $B(\tau)$ locally lies within the sliding surface and, therefore, the desired dynamics
+              $$
+                \frac{dz}{d\tau} = -k_3 \,\mathrm{sign}(z)
+              $$
+              cannot be achieved. This issue was considered in [1].
+            </div>
+            <div class="footnote" style="max-width: 95%">
+              [1] L. Ovalle, L. Fridman, "Sliding mode control for systems with zero-crossing control gain under matched and mismatched disturbances," Automatica, vol. 159, 2024.
+            </div>
+          </div>
+          <div>
+            <div class="comment">
+              <div class="comment-title">Control modification<sup>*</sup>:</div>
+              If $n^{\top}\left(\tau_z\right)B\left(\tau_z\right) = 0$ at finitely many isolated points $\tau_z \in [0, T]$, we can change the feedback
+              $$
+                w\left(\tau,\xi\right)=-\boxed{\frac{n^{\top}\left(\tau\right)A\left(\tau\right)n\left(\tau\right)}{n^{\top}\left(\tau\right)B\left(\tau\right)}} \, z-
+                \boxed{\frac{k_{3}}{n^{\top}\left(\tau\right)B\left(\tau\right)}}\,\mathrm{sign}\left(z\right)
+              $$
+              with
+              $$
+                w\left(\tau,\xi\right)=-\boxed{k_{4}\,\sigma\left(n^{\top}\left(\tau\right)B\left(\tau\right)\right)} \, z
+                -\boxed{k_{3}\,\sigma\left(n^{\top}\left(\tau\right)B\left(\tau\right)\right)} \, \mathrm{sign}\left(z\right)
+              $$
+              where $\sigma(x)$ is a sigmoid-like function, e.g., 
+              $$
+                \sigma(x) = x / (|x| + \varepsilon).
+              $$
+              The proposed control induces the dynamics of the sliding variable
+              <div class="math-annotated">
+                <span>
+                  $$\frac{dz}{d\tau}=$$
+                </span>
+                <span class="term">
+                  <span class="math"> $$ \left(n^{\top}A\,n-k_{4}n^{\top}B\,\sigma\left(n^{\top}B\right)\right) $$ </span>
+                  <span class="label"> periodic function of $\tau$ </span>
+                </span>
+                <span class="math"> $$ z - $$ </span>
+                <span class="term">
+                  <span class="math"> $$ \quad k_{3}n^{\top}B\,\sigma\left(n^{\top}B\right) \quad $$ </span>
+                  <span class="label" style="bottom: -1.6em;"> non-negative periodic function of $\tau$ </span>
+                </span>
+                <span class="math"> $$ \mathrm{sign}\left(z\right) $$ </span>
+              </div>
+              <br>
+              and convergence over a period can be achieved by selecting sufficiently large $k_3, k_4.$
+            </div>
+            <div class="footnote" style="max-width: 95%">
+              * I am planning to submit this result to IFAC 2026.
+            </div>
+          </div>
+        </div>
+
+        
+      </section>
+
+      <section data-title="Butterfly Robot Periodic Motion" data-background-gradient="radial-gradient(#000, #333)">
+        <div class="video-frame">
+          <video src="media/forth-and-back.mp4" controls autoplay muted loop playsinline class="video">
+          </video>
+          <div class="video-credit">
+            <b>credits:</b> Maksim Surov
+            <a href="https://youtu.be/hx9mxDxHBB0">youtu.be/hx9mxDxHBB0</a>
+          </div>
+        </div>
+      </section>
+
+      <section data-title="Periodic Trajectory / Alternative Transverse Coordinates">
+        <div class="cols"> 
+          <div> <!-- column 1 -->
+            <div class="regular">
+              Alternative transverse coordinates $(q, \dot q) \mapsto (\tau, \xi)$ based on cylindrical transformation:
+              $$\begin{aligned}
+                \tau &:= \mathrm{arctan2}\left(-\dot{\varphi},\varphi-\frac{\pi}{2}\right) \\
+                \xi_{1} &:= \vartheta-\Theta\left(\varphi\right) \\
+                \xi_{2} &:= \dot{\vartheta}-\Theta'\left(\varphi\right)\dot{\varphi} \\
+                \xi_{3} &:= \left(\varphi-\phi\left(\tau\right)\right)\cos\tau-\left(\dot{\varphi}-\dot{\phi}\left(\tau\right)\right)\sin\tau.
+              \end{aligned}$$
+            </div>
+          </div>
+          <div> <!-- column 2 -->
+            <figure class="figure">
+              <img src="media/forth_and_back_reference_trajectory.svg"
+                   alt="Butterfly robot kinematics"
+                   style="width: 100%;">
+              <figcaption class="caption">
+                Figure 11. Periodic trajectory of the robot.
+              </figcaption>
+            </figure>
+          </div>
+          <div style="flex: 0.7"> <!-- column 3 -->
+            <figure class="figure">
+              <img src="media/polar-coordinates.svg"
+                   alt="Butterfly robot kinematics"
+                   style="width: 100%;">
+              <figcaption class="caption">
+                Figure 12. The polar angle serves as the projection variable $\tau$. The coordinate $\xi_3$ defines the deviation in the radial direction.
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section data-title="Sliding Variable Evolution">
+        <div class="cols">
+          <div>
+            <div class="regular">
+              Reaching time estimation:
+              \[
+                \tau_{r} \leq T\left(1+\left\lceil \frac{\left|z_{o}\right|}{k_{3}\exp\left(m\right)d}\right\rceil \right)<\infty.
+              \]
+              where
+              $$\small\begin{aligned}
+                m &:= \inf_{\tau\in\left[\tau_{0},\tau_{0}+T\right]}\int_{\tau_{o}}^{\tau}k_{4}n^{\top}B\,\sigma\left(n^{\top}B\right)-n^{\top}A\,n\,dv \in\mathbb{R} \\
+                d &:= \int_{0}^{T}n^{\top}B\,\sigma\left(n^{\top}B\right)dv > 0
+              \end{aligned}$$
+
+              While $z$ converges over an interval, its dynamics may become uncontrollable on small intervals where $n^\top B$ is close to zero:
+              $$\begin{aligned}
+                \frac{dz}{d\tau}&=\left(n^{\top}A\,n-\underbrace{k_{4}n^{\top}B\,\sigma\left(n^{\top}B\right)}_{\text{vanishes}}\right)z \\[6pt]
+                 &\quad - \underbrace{k_{3}n^{\top}B\,\sigma\left(n^{\top}B\right)\mathrm{sign}\left(z\right)}_{\text{vanishes}}\\[10pt]
+                &\approx n^{\top}\left(\tau\right)A\left(\tau\right)\,n\left(\tau\right)z
+              \end{aligned}$$
+            </div>
+          </div>
+
+          <div style="flex: 1; margin-left: -1rem;">
+            <figure class="figure">
+              <img src="media/forth_and_back_stable_subspace.svg"
+                   alt="Butterfly robot kinematics"
+                   style="width:100%; ">
+              <figcaption class="caption">
+                Figure 13. Stable subspace normal vector $n$ and the control-related coefficient $n^\top B$.
+              </figcaption>
+            </figure>
+            <div class="regular">
+              At low speeds, friction becomes significant, causing the ball to get stuck for $\tau$ near $0$ and $\pi$.
+            </div>
+          </div>
+
+          <div style="flex: 1">
+            <figure class="figure">
+              <img src="media/forth_and_back_control_vanishing.svg"
+                   alt="Butterfly robot kinematics"
+                   style="width:100%; ">
+            </figure>
+          </div>
+        </div>
+      </section>
+
+
+      <section data-title="Remark: Generaliztion for n-DOF Systems win n-1 controls">
+
+        <div class="cols">
+          <div>
+            <div class="comment">
+              For mechanical system with $n$-DOF and $n-1$ control inputs, we define the transverse coordinates as
+              $$\small \begin{aligned}
+                \xi_{1}&=q_{1}-\Theta_{1}\left(q_{n}\right)\\\xi_{2}&=\dot{q}_{1}-\frac{d\Theta_{1}\left(q_{n}\right)}{dq_{n}}\dot{q}_{n}\\\xi_{3}&=q_{2}-\Theta_{2}\left(q_{n}\right)\\\xi_{4}&=\dot{q}_{2}-\frac{d\Theta_{2}\left(q_{n}\right)}{dq_{n}}\dot{q}_{n}\\&\dots\\\xi_{2n-1}&=E\left(q_{n},\dot{q}_{n}\right)
+              \end{aligned}$$
+              Then, linearized transverse dynamics with partial stabilization can be represented as
+              \[\small
+                \frac{d\bar{\xi}}{d\tau}=\underbrace{\left(\begin{array}{cccccc}
+                  0 & 1 & 0 & 0 & 0\\
+                  -k_{1} & -k_{2} & 0 & 0 & 0\\
+                  0 & 0 & 0 & 1 & 0 & \dots\\
+                  0 & 0 & -k_{3} & -k_{4} & 0\\
+                   &  & \dots\\
+                  a_{1}\left(\tau\right) & a_{2}\left(\tau\right) & a_{3}\left(\tau\right) & \dots
+                  \end{array}\right)}_{=:A\left(\tau\right)\in\mathbb{R}^{\left(2n-1\right)\times\left(2n-1\right)}}\bar{\xi}+\underbrace{\left(\begin{array}{cccc}
+                  0 & 0 & 0\\
+                  1 & 0 & 0\\
+                  0 & 0 & 0 & \dots\\
+                  0 & 1 & 0\\
+                   & \dots\\
+                  b_{1}\left(\tau\right) & b_{2}\left(\tau\right) & \dots
+                  \end{array}\right)}_{=:B\left(\tau\right)\in\mathbb{R}^{\left(2n-1\right)\times\left(n-1\right)}}w
+              \]
+              The LTV system admits $(2n-2)$-dimensional stable subspace, provided $k_i > 0$.
+            </div>
+          </div>
+          <div>
+            <div class="remark">
+              <div class="remark-title">Remark:</div>
+              Theorem can be generalized for the case of $d$-dimensional LTV system
+              with $d-1$ stable subspace and $m$ control inputs.
+              We define the subspace as
+              \[
+                \mathcal{S}_{\tau}\equiv\mathrm{span}\left(e_{1}\left(\tau\right),e_{2}\left(\tau\right),\dots,e_{d-1}\left(\tau\right)\right)
+              \]
+              Then, the normal vector $n(\tau)$ to this subspace is defined via the oriented volume form (or the Hodge star $*$) as
+              \[
+                n\left(\tau\right)=\frac{*\left(e_{1}\left(\tau\right)\wedge e_{2}\left(\tau\right)\wedge\dots\wedge e_{d-1}\left(\tau\right)\right)}{\left\Vert *\left(e_{1}\left(\tau\right)\wedge e_{2}\left(\tau\right)\wedge\dots\wedge e_{d-1}\left(\tau\right)\right)\right\Vert } \in \mathbb{R}^d.
+              \]
+              The sliding variable
+              \[
+                z = n^\top(\tau) \bar\xi.
+              \]
+              The control law modifies as
+              $$\begin{aligned}
+                w\left(\tau,\bar\xi\right) &= \frac{B^{\top}n}{n^{\top}BB^{\top}n}\left(-n^{\top}Anz-k_3\mathrm{sign}z\right),
+              \end{aligned}$$
+              provided that $n\left(\tau\right)\notin\ker B^{\top}\left(\tau\right)$ for all $\tau$.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-title="">
+        <h1>Time synchronization of <br> orbitally stabilized trajectories </h1>
+      </section>
+
+      <section data-title="Time Synchronization">
+          <div style="max-width: 60%">
+            <div class="comment">
+              The orbital asymptotic stability:
+              $$\mathrm{dist}(x(t), x_*) \to 0 \quad\text{as}\quad t \to \infty$$
+              The (usual) asymptotic stability
+              $$
+                \Vert x(t) - x_*(t) \Vert \to 0 \quad\text{as}\quad t \to \infty
+              $$
+            </div>
+            <div class="comment">
+              The transverse linearization based control establishes orbital stability only:
+              <br>
+              <ul>
+                <li>In theory
+                  \[
+                    \Vert x(t) - x_*(t) \Vert \to \mathrm{const} \quad \text{as} \quad t \to \infty.
+                  \]
+                </li>
+                <li>In practice $x(t)$ and $x_*(t)$ drift apart.
+                </li>
+              </ul>
+            </div>
+            <div class="fragment fade-left">
+              <div class="alert">
+                Can we modify the transverse linearization approach to achieve asymptotic stability?
+              </div>
+            </div>
+          </div>
+      </section>
+
+      <section data-title="Transverse Linearization Scheme">
+        <div class="process-flow">
+          <div class="box">
+            Original dynamics:
+            \[
+              \dot{x} = f(x) + g(x) u, \quad x\in\mathbb{R}^3, \quad u\in\mathbb{R}.
+            \]
+            and $T$-periodic trajectory $x_*(t), u_*(t)$.
+          </div>
+          <div class="arrow"> &#8658; </div>
+          <div class="box">
+            Coordinates transformation $x\simeq (\tau,\xi)$
+            \[
+              \tau = \tau(x) \in \mathbb{R} \quad \text{and} \quad \xi = \xi(x) \in \mathbb{R}^{3}
+            \]
+            New control signal $u\mapsto w$
+            \[
+              u = u(w, x)
+            \]
+            satisfying
+            \[
+              \frac{d}{dt} x_*(t) \equiv f(x_*(t)) + g(x_*(t)) u(0, x_*(t)).
+            \]
+          </div>
+          <div class="arrow"> &#8658; </div>
+          <div class="box">
+            Dynamics in new coordinates 
+            $$\begin{aligned}
+              \frac{d\xi}{dt} &= f_\xi(\tau, \xi) + g_\xi(\tau, \xi) w \\
+              \frac{d\tau}{dt} &= f_\tau(\tau, \xi) + g_\tau(\tau, \xi) w
+            \end{aligned}$$
+          </div>
+          <div class="arrow"> &#8658; </div>
+        </div>
+        <div class="process-flow" style="justify-content: right;">
+          <div class="arrow"> &#8658; </div>
+          <div class="box">
+            Linearized transverse dynamics
+            \[
+              \frac{d\xi}{d\tau}=A\left(\tau\right)\xi+B\left(\tau\right)w+o\left(\xi,w\right)
+            \]
+          </div>
+          <div class="fragment fade-left">
+            <div class="process-flow" style="justify-content: right;">
+              <div class="arrow"> &#8658; </div>
+              <div class="box">
+                Extend transverse dynamics with <br>
+                dynamics of synchronization variable?
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-title="Lateness Dynamics">
+        <div class="cols">
+          <div class="regular" style="border-right: 2px solid rgba(150, 150, 150, 0.50); margin-left: -1rem;">
+            Using the projection variable
+            \[
+              \tau = \tau(x),
+            \]
+            Define projection along the trajectory, extending it beyond one period
+            $$\begin{aligned}
+              &\, \tau_{*}\left(t\right) := \tau\left(x_{*}\left(t\right)\right) \quad \text{for} \quad t \in [0, T] \\[6pt]
+              &\, \tau_{*}\left(t + \nu T\right) := \tau_{*}\left(t\right) + \nu T_{\tau} \quad \forall \nu \in \mathbb{Z},
+            \end{aligned}$$
+            which is supposed to be strictly increasing (by requirement for transverse coordinates).
+            <br>
+            Then, define robot's self-time as
+            <div class="box">
+              \[
+                t_{\mathrm{self}} = \tau_*^{-1}(\tau) + \nu T
+              \]
+            </div>
+            where $\nu$ counts for periods passed by the robot. 
+            The control system is supposed to remember and modify the counter $\nu$.
+          </div>
+          <div class="regular" style="border-right: 2px solid rgba(150, 150, 150, 0.50); margin-left: -1rem;">
+            Define the <b>lateness</b> as
+            <div class="box">
+              \[
+                h = t - t_{\mathrm{self}}
+              \]
+            </div>
+            where $t$ is the physical (absolute) time.
+            After rewriting the dynamics in terms of the variable $\tau$,
+            $t$ effectively becomes a dynamic variable. 
+            Its evolution along a solution 
+            $\left(\xi\left(\tau\right),w\left(\tau\right)\right)$
+            of dynamics
+            \[
+              \frac{d\xi}{d\tau}=A\left(\tau\right)\xi+B\left(\tau\right)w+o\left(\xi,w\right)
+            \]
+            are determined as
+            \[
+              t(\tau) = t_{0}+\int_{\tau_{0}}^{\tau}\frac{d\eta}{f_{\tau}\left(\eta, \xi\left(\eta\right) \right)+g_{\tau}\left(\eta, \xi\left(\eta\right)\right)w\left(\eta\right)}
+            \]
+            so that the dynamics of $t$ now depends on the behavior of new variables. 
+          </div>
+          <div class="regular" style="margin-left: -1rem;">
+            Dynamics of lateness $h$
+            \[
+              \frac{dh}{d\tau} = \frac{dt}{d\tau} - \frac{d t_{\mathrm{self}}}{d\tau}
+            \]
+            becomes
+            <p class="box">
+              \[
+                \frac{dh}{d\tau}=\frac{1}{f_{\tau}(\tau,\xi)+g_{\tau}(\tau,\xi)w}-\frac{1}{\tau_{*}'\left(\tau_{*}^{-1}\left(\tau\right)\right)}
+              \]
+            </p>
+            where
+            \[
+              \tau'_{*}\left(t\right):=\frac{d\tau_{*}\left(t\right)}{dt}=\left.\frac{\partial\tau\left(x\right)}{\partial x}\right|_{x=x_{*}\left(t\right)}\frac{dx_{*}\left(t\right)}{dt}
+            \]
+          </div>
+        </div>
+      </section>
+
+      <section data-title="Extended Transverse Dynamics">
+        <div class="cols">
+          <div class="regular" style="border-right: 2px solid rgba(150, 150, 150, 0.50);">
+            Transverse dynamics extended with dynamics of the lateness variable $h$:
+            $$\begin{aligned}
+              \frac{d \xi}{d\tau} &= A(\tau) \xi + B(\tau) w \\[6pt]
+              \frac{d h}{d\tau} &= A_h(\tau) \xi + B_h(\tau) w \\
+            \end{aligned}$$
+            with $T_\tau$-periodic coefficients
+            $$\begin{aligned}
+              &\, A(\tau) \in \mathbb{R}^{3\times 3}, \quad 
+              B(\tau) \in \mathbb{R}^{3\times 1}, \\
+              &\, A_h(\tau) \in \mathbb{R}^{1\times 3}, \quad 
+              B_h(\tau) \in \mathbb{R}. \\
+            \end{aligned}$$
+            Control objective:
+            \[
+              \xi \to 0 \quad \text{and} \quad h \to 0.
+            \]
+          </div>
+          <div>
+            <div class="regular">
+              <b>The linear with $h$ feedback law does not make sense</b>
+              \[
+                w = K_\xi (\tau) \xi + K_h(\tau) h
+              \]
+              as the result is equivalent to the usual linearization 
+              for deviation $e = x - x_*(t)$.
+              <br>
+              The control law guarantees local asymptotic stability only:
+              Initial state $x_{0}$ within $U_{\epsilon}$
+              and small initial lateness
+              \[
+                \left| h_0 \right| = \left|t_{0}-\tau_{*}^{-1}\left(\tau\left(x_{0}\right)\right)\right| < \varepsilon.
+              \]
+              For larger initial time deviations, stability may be compromised even when $x_{0}\in x_*$.
+            </div>
+            <div class="fragment fade-left">
+              <div class="alert">
+                The idea is to implement a control law, in which $h$ is in argument of $\mathrm{sign}$ function.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-title="Stabilization of Extended Dynamics">
+        <div class="cols">
+          <div class="regular" style="border-right: 2px solid rgba(150, 150, 150, 0.50);">
+            <ol>
+              <li>
+                Represent control law
+                \[
+                  w(\tau,\xi,h) = w_\mathrm{stab}(\tau,\xi) + w_\mathrm{sync}(\tau,\xi,h)
+                \]
+                as the sum of the orbital stabilization term $w_\mathrm{stab}$ and the time synchronization $w_\mathrm{sync}$.
+              </li>
+              <li>
+                Evaluate the stabilization term
+                \[
+                  w_\mathrm{stab}(\tau,\xi) = K(\tau) \xi
+                \]
+                by solving LQR for the $\xi$-subsystem
+                \[
+                  \frac{d\xi}{d\tau} = A(\tau) \xi + B(\tau) w_\mathrm{stab}
+                \]
+                so that
+                \[
+                  \frac{d\xi}{d\tau} = \left(A(\tau) + B(\tau) K(\tau)\right)\xi
+                \]
+                is stable.
+              </li>
+            </ol>
+          </div>
+          <div class="regular" style="flex: 1.3; margin-left: -1rem;">
+            <ol>
+              <li value="3">
+                For the extended system
+                $$\begin{aligned}
+                  \frac{d\xi}{d\tau}&=\left(A\left(\tau\right)+B\left(\tau\right)K\left(\tau\right)\right)\xi+B\left(\tau\right)w_{\mathrm{sync}}\\\frac{dh}{d\tau}&=\left(A_{h}\left(\tau\right)+B_{h}\left(\tau\right)K\left(\tau\right)\right)\xi+B_{h}\left(\tau\right)w_{\mathrm{sync}}
+                \end{aligned}$$
+                design the sliding-mode based control as
+                \[
+                  w_{\mathrm{sync}}\left(\tau,\xi,h\right)=-\frac{k_{s}}{n^{\top}\left(\tau\right)B\left(\tau\right)+B_{h}\left(\tau\right)}\mathrm{sign}\left(n^{\top}\left(\tau\right)\xi+h\right)
+                \]
+                where $k_s > 0$ and $n(\tau)$ is the periodic solution to the linear ODE
+                $$
+                  \frac{dn}{d\tau}=-\left(A\left(\tau\right)+B\left(\tau\right)K\left(\tau\right)\right)^{\top}n  -\left(A_{h}\left(\tau\right)+B_{h}\left(\tau\right)K\left(\tau\right)\right)^{\top}.
+                $$
+              </li>
+              <li>
+                Resulting control becomes
+                <div class="math-annotated">
+                  <span>
+                    $$ w\left(\tau,\xi,h\right)= $$
+                  </span>
+                  <span class="term">
+                    <span class="math"> $$ K(\tau) \xi \quad $$ </span>
+                    <span class="label" style="bottom: -1.6em"> stabilization term </span>
+                  </span>
+                  <span>
+                    <span class="math"> $-$ </span>
+                  </span>
+                  <span class="term">
+                    <span class="math"> $$ \frac{k_{s}}{n^{\top}\left(\tau\right)B\left(\tau\right)+B_{h}\left(\tau\right)}\mathrm{sign}\left(n^{\top}\left(\tau\right)\xi+h\right) $$</span>
+                    <span class="label"> bounded time synchronization term</span>
+                  </span>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="footnote" style="max-width: 60%">
+          The result is published in the preprint M. Surov, "Orbital Stabilization and Time Synchronization of Unstable Periodic Motions in Underactuated Robots", 2025, arxiv.org/abs/2509.20082.
+        </div>
+      </section>
+
+      <section data-title="Experiment on Real Robot">
+        <div style="width: 60%; margin: 0.6rem auto 0.6rem;">
+          <figure class="figure" style="flex: 0.6">
+            <img src="media/phase_coords_transient.svg"
+                 alt="Butterfly robot kinematics"
+                 style="width:100%">
+            <figcaption class="caption">
+              Figure 14. Transient behavior of phase variables in experiment.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section data-title="Decentralized Synchronization of Six Robots" data-background-gradient="radial-gradient(#000, #333)">
+        <div class="video-frame">
+          <video src="media/sync-butterfly-presentation.mp4" controls autoplay muted loop playsinline class="video">
+          </video>
+          <div class="video-credit">
+            <b>credits:</b> Maksim Grigorov, Maksim Surov
+            <a href="https://youtu.be/WtvYQWtRSiw">youtu.be/WtvYQWtRSiw</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Page number badge -->
+  <div class="page-number-badge" id="page-number">1 / 1</div>
+
+  <!-- Reveal.js -->
+  <script src="../../plugin/math/math.js"></script>
+  <script src="../../dist/reveal.js"></script>
+  <script>
+    // Initialize Reveal
+    const deck = new Reveal({
+      width: 1920,
+      height: 1080,
+      controls: true,
+      progress: true,
+      center: true,
+      hash: true,
+      slideNumber: false, // we'll show a custom page number badge
+      transition: 'slide',
+      dependencies: [
+        // add plugins here if needed
+      ],
+	    plugins: [ RevealMath.KaTeX ],
+	    // plugins: [ RevealMath.MathJax3 ],
+      math: {
+        delimiters: [
+          {left: "$$", right: "$$", display: true},
+          {left: "\\[", right: "\\]", display: true},
+          {left: "$", right: "$", display: false},
+          {left: "\\(", right: "\\)", display: false}
+        ]
+      }
+    });
+    deck.initialize();
+
+    // Helper to update page number and subtitle
+    function updateStatus() {
+      const indices = deck.getIndices();
+      const total = (function countSections(){
+        // count top-level sections only (not vertical stacks), emulate visible slides count
+        const secs = Array.from(document.querySelectorAll('.reveal .slides > section'));
+        // include vertically nested sections: flatten
+        let count = 0;
+        secs.forEach(s=>{
+          const children = s.querySelectorAll('section');
+          if(children.length) count += children.length; else count +=1;
+        });
+        return count;
+      })();
+
+      // Compute linear index (1-based): horizontal index plus vertical offset
+      // Reveal offers getTotalSlides() but not in all builds; compute manually
+      const horizontal = indices.h || 0;
+      const vertical = indices.v || 0;
+
+      // Create a simple mapping: iterate all top-level sections and accumulate
+      const tops = Array.from(document.querySelectorAll('.reveal .slides > section'));
+      let linearIndex = 0;
+
+      for(let i=0;i<tops.length;i++){
+        const nested = tops[i].querySelectorAll('section');
+        if(nested.length){
+          if(i < horizontal) linearIndex += nested.length;
+          else if(i === horizontal) linearIndex += (vertical + 1);
+        } else {
+          if(i < horizontal) linearIndex += 1;
+          else if(i === horizontal) linearIndex += 1;
+        }
+      }
+
+      if (linearIndex === 0) linearIndex = 1; // fallback
+
+      // Update DOM
+      const badge = document.getElementById('page-number');
+      badge.textContent = linearIndex + ' / ' + total;
+
+      // Update slide subtitle from the slide's h2 or data-title
+      const current = deck.getCurrentSlide();
+      let label = '';
+      if(current) {
+        const h2 = current.querySelector('h2');
+        if(current.dataset && current.dataset.title) {
+          label = current.dataset.title;
+        } else if (h2) {
+          label = h2.textContent.trim();
+        }
+      }
+
+      if (label) {
+        document.getElementById('slide-subtitle').textContent = label;
+      } else {
+        document.getElementById('slide-subtitle').textContent = '';
+      }
+    }
+
+    deck.on('ready', updateStatus);
+    deck.on('slidechanged', updateStatus);
+    deck.on('fragmentshown', updateStatus);
+  </script>
+</body>
+</html>
