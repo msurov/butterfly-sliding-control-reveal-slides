@@ -56,8 +56,10 @@
         <div class="cols">
           <div>
             <h1>
-              Sliding-Mode Control Methodology for
-              Trajectory Tracking in Underactuated Robots
+              Sliding-Mode Control for
+              <br>
+              Trajectory Tracking in 
+              <br>Underactuated Robots
             </h1>
 
             <div>
@@ -621,7 +623,8 @@
                 <ol>
                   <li>Local diffeomorphism: $(q,\dot q) \simeq (\tau,\xi)$.</li>
                   <li>Transverse coordinates vanish on the orbit: $\xi(q_*(t), \dot q_*(t)) = 0$ for all $t$.</li>
-                  <li>Projection operator satisfies: $\dot\tau = L_{\dot{q}}\tau \geq \mathrm{const} > 0$.</li>
+                  <li>Projection operator satisfies $\frac{d\tau\left(x_{*}\left(t\right)\right)}{dt} \geq\mathrm{const}>0$ for all $t$.
+                  </li>
                 </ol>
               </div>
             </div>
@@ -836,7 +839,7 @@
                   </ul>
                 </li>
                 <li>
-                  The normal vector $n(\tau)$ is computed as
+                  The normal vector $n(\tau)$ computed as
                   $$
                     n(\tau)\equiv\frac{e_{1}\left(\tau\right)\times e_{2}\left(\tau\right)}{\left\Vert e_{1}\left(\tau\right)\times e_{2}\left(\tau\right)\right\Vert }
                   $$
@@ -1009,11 +1012,11 @@
             </span>
             <span class="term">
               <span class="math"> $$ + w\left(\tau,\xi\right) $$ </span>
-              <span class="label" style="bottom: -1.6em"> sliding control </span>
+              <span class="label"> sliding control </span>
             </span>
             <span class="term">
               <span class="math"> $$ - k_{1}\xi_{1}-k_{2}\xi_{2} $$ </span>
-              <span class="label" style="bottom: -1.6em"> VHC stabilization </span>
+              <span class="label"> VHC stabilization </span>
             </span>
             <span>
               $$ \huge) $$
@@ -1123,12 +1126,12 @@
                   $$\frac{dz}{d\tau}=$$
                 </span>
                 <span class="term">
-                  <span class="math"> $$ \left(n^{\top}A\,n-k_{4}n^{\top}B\,\sigma\left(n^{\top}B\right)\right) $$ </span>
+                  <span class="math"> $$ \left(n^{\top}A\,n-k_{4} \, n^{\top}B\,\sigma\left(n^{\top}B\right)\right) $$ </span>
                   <span class="label"> periodic function of $\tau$ </span>
                 </span>
                 <span class="math"> $$ z - $$ </span>
                 <span class="term">
-                  <span class="math"> $$ \quad k_{3}n^{\top}B\,\sigma\left(n^{\top}B\right) \quad $$ </span>
+                  <span class="math"> $$ \quad k_{3} \, n^{\top}B\,\sigma\left(n^{\top}B\right) \quad $$ </span>
                   <span class="label" style="bottom: -1.6em;"> non-negative periodic function of $\tau$ </span>
                 </span>
                 <span class="math"> $$ \mathrm{sign}\left(z\right) $$ </span>
@@ -1139,19 +1142,6 @@
             <div class="footnote" style="max-width: 95%">
               * I am planning to submit this result to IFAC 2026.
             </div>
-          </div>
-        </div>
-
-        
-      </section>
-
-      <section data-title="Butterfly Robot Periodic Motion" data-background-gradient="radial-gradient(#000, #333)">
-        <div class="video-frame">
-          <video src="media/forth-and-back.mp4" controls autoplay muted loop playsinline class="video">
-          </video>
-          <div class="video-credit">
-            <b>credits:</b> Maksim Surov
-            <a href="https://youtu.be/hx9mxDxHBB0">youtu.be/hx9mxDxHBB0</a>
           </div>
         </div>
       </section>
@@ -1192,13 +1182,24 @@
         </div>
       </section>
 
+      <section data-title="Butterfly Robot Periodic Motion" data-background-gradient="radial-gradient(#000, #333)">
+        <div class="video-frame">
+          <video src="media/forth-and-back.mp4" controls autoplay muted loop playsinline class="video">
+          </video>
+          <div class="video-credit">
+            <b>credits:</b> Maksim Surov
+            <a href="https://youtu.be/hx9mxDxHBB0">youtu.be/hx9mxDxHBB0</a>
+          </div>
+        </div>
+      </section>
+
       <section data-title="Sliding Variable Evolution">
         <div class="cols">
           <div>
             <div class="regular">
               Reaching time estimation:
               \[
-                \tau_{r} \leq T\left(1+\left\lceil \frac{\left|z_{o}\right|}{k_{3}\exp\left(m\right)d}\right\rceil \right)<\infty.
+                \tau_{r} \leq T_\tau \left(1+\left\lceil \frac{\left|z_{o}\right|}{k_{3}\exp\left(m\right)d}\right\rceil \right)<\infty.
               \]
               where
               $$\small\begin{aligned}
@@ -1452,7 +1453,7 @@
 
       <section data-title="Extended Transverse Dynamics">
         <div class="cols">
-          <div class="regular" style="border-right: 2px solid rgba(150, 150, 150, 0.50);">
+          <div class="regular" style="flex: 0.7; border-right: 2px solid rgba(150, 150, 150, 0.50);">
             Transverse dynamics extended with dynamics of the lateness variable $h$:
             $$\begin{aligned}
               \frac{d \xi}{d\tau} &= A(\tau) \xi + B(\tau) w \\[6pt]
@@ -1472,24 +1473,27 @@
           </div>
           <div>
             <div class="regular">
-              <b>The linear with $h$ feedback law does not make sense</b>
+              <b>A linear with $h$ feedback law does not make sense</b>
               \[
                 w = K_\xi (\tau) \xi + K_h(\tau) h
               \]
-              as the result is equivalent to the usual linearization 
-              for deviation $e = x - x_*(t)$.
-              <br>
+              as the result is equivalent (up to a linear transformation) to the usual linearization 
+              for deviation $e = x - x_*(t)$:
+              \[\begin{aligned}
+                \frac{de}{dt}&=f\left(x_{*}\left(t\right)+e\right)+g\left(x_{*}\left(t\right)+e\right)u\\&\approx\left(\frac{\partial f\left(x\right)}{\partial x}+\frac{\partial g\left(x\right)u_{*}\left(t\right)}{\partial x}\right)_{x=x_{*}\left(t\right)}e+g\left(x_{*}\left(t\right)\right)\Delta u
+              \end{aligned}\]
               The control law guarantees local asymptotic stability only:
-              Initial state $x_{0}$ within $U_{\epsilon}$
-              and small initial lateness
               \[
-                \left| h_0 \right| = \left|t_{0}-\tau_{*}^{-1}\left(\tau\left(x_{0}\right)\right)\right| < \varepsilon.
+                \left\Vert x_{0}-x_{*}\left(t\right)\right\Vert <\varepsilon_{1}\quad\Leftrightarrow\quad\begin{array}{c}
+                \xi_{0}\in U_{\varepsilon_{2}}\\
+                \left|h_{0}\right|=\left|t_{0}-\tau_{*}^{-1}\left(\tau\left(x_{0}\right)\right)\right|<\varepsilon_{2}
+                \end{array}
               \]
               For larger initial time deviations, stability may be compromised even when $x_{0}\in x_*$.
             </div>
             <div class="fragment fade-left">
               <div class="alert">
-                The idea is to implement a control law, in which $h$ is in argument of $\mathrm{sign}$ function.
+                The idea is to implement a control law, in which synchronization term is bounded for arbitrary $h$. Example: $h$ is in argument of $\mathrm{sign}$ function.
               </div>
             </div>
           </div>
@@ -1498,33 +1502,47 @@
 
       <section data-title="Stabilization of Extended Dynamics">
         <div class="cols">
-          <div class="regular" style="border-right: 2px solid rgba(150, 150, 150, 0.50);">
-            <ol>
-              <li>
-                Represent control law
-                \[
-                  w(\tau,\xi,h) = w_\mathrm{stab}(\tau,\xi) + w_\mathrm{sync}(\tau,\xi,h)
-                \]
-                as the sum of the orbital stabilization term $w_\mathrm{stab}$ and the time synchronization $w_\mathrm{sync}$.
-              </li>
-              <li>
-                Evaluate the stabilization term
-                \[
-                  w_\mathrm{stab}(\tau,\xi) = K(\tau) \xi
-                \]
-                by solving LQR for the $\xi$-subsystem
-                \[
-                  \frac{d\xi}{d\tau} = A(\tau) \xi + B(\tau) w_\mathrm{stab}
-                \]
-                so that
-                \[
-                  \frac{d\xi}{d\tau} = \left(A(\tau) + B(\tau) K(\tau)\right)\xi
-                \]
-                is stable.
-              </li>
-            </ol>
+          <div style="margin-top: 2rem; flex: 0.7;">
+            <div class="regular">
+              <ol>
+                <li>
+                  Represent control law
+                  \[
+                    w(\tau,\xi,h) = w_\mathrm{stab}(\tau,\xi) + w_\mathrm{sync}(\tau,\xi,h),
+                  \]
+                  where
+                  <table style="margin-left: 0;">
+                    <tbody>
+                      <tr>
+                        <td style="border: none">$w_\mathrm{stab}$</td>
+                        <td style="border: none">orbital stabilization feedback term</td>
+                      </tr>
+                      <tr>
+                        <td style="border: none">$w_\mathrm{sync}$</td>
+                        <td style="border: none">time synchronization feedback term</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </li>
+                <li>
+                  Evaluate the stabilization term
+                  \[
+                    w_\mathrm{stab}(\tau,\xi) = K(\tau) \xi
+                  \]
+                  by solving LQR for the $\xi$-subsystem
+                  \[
+                    \frac{d\xi}{d\tau} = A(\tau) \xi + B(\tau) w_\mathrm{stab}
+                  \]
+                  so that the periodic ODE
+                  \[
+                    \frac{d\xi}{d\tau} = \left(A(\tau) + B(\tau) K(\tau)\right)\xi
+                  \]
+                  is stable.
+                </li>
+              </ol>
+            </div>
           </div>
-          <div class="regular" style="flex: 1.3; margin-left: -1rem;">
+          <div class="regular" style="flex: 1.3; margin-left: -1rem; border-left: 2px solid rgba(150, 150, 150, 0.50); ">
             <ol>
               <li value="3">
                 For the extended system
@@ -1541,7 +1559,7 @@
                 $$
               </li>
               <li>
-                Resulting control becomes
+                For any $k_s > 0$, the resulting control
                 <div class="math-annotated">
                   <span>
                     $$ w\left(\tau,\xi,h\right)= $$
@@ -1558,6 +1576,9 @@
                     <span class="label"> bounded time synchronization term</span>
                   </span>
                 </div>
+                <br>
+                provides asymptotic stability for $\xi,h$-dynamics. Selecting $k_s = 0$ reduces the controller to standard orbital stabilization. This allows a tunable trade-off between orbit tracking
+                performance and the rate of lateness decay.
               </li>
             </ol>
           </div>
@@ -1565,6 +1586,54 @@
 
         <div class="footnote" style="max-width: 60%">
           The result is published in the preprint M. Surov, "Orbital Stabilization and Time Synchronization of Unstable Periodic Motions in Underactuated Robots", 2025, arxiv.org/abs/2509.20082.
+        </div>
+      </section>
+
+      <section data-title="Stability analysis">
+        <div class="cols">
+          <div class="comment">
+            <div class="comment-title">Proof of stability</div>
+            <ol>
+              <li class="fragment fade-in-then-semi-out">
+                Dynamics of the sliding variable
+                \[
+                  z := n^{\top}\left(\tau\right)\xi + h
+                \]
+                under the feedback become
+                \[
+                  \frac{dz}{d\tau} = \frac{dn^{\top}\left(t\right)}{d\tau}\xi+n^{\top}\left(t\right)\frac{d\xi}{d\tau}+\frac{dh}{d\tau} 
+                  = -k_{s}\,\mathrm{sign}z
+                \]
+              </li>
+              <li class="fragment fade-in-then-semi-out">
+                Equivalent control is zero $w_{eq}=0$, yielding stable dynamics for $\xi$-subsystem.
+              </li>
+              <li class="fragment fade-in-then-semi-out"> 
+                While $z \ne 0$ the $\xi$-subsystem is subject to the bounded periodic disturbance
+                \[
+                  \pm\frac{k_{s}B\left(\tau\right)}{n^{\top}\left(\tau\right)B\left(\tau\right)+B_{h}\left(\tau\right)}.
+                \]
+                Due to the $\xi$-subsystem is stable, their solution converges to a periodic function
+                of amplitude $O(k_s)$. 
+              </li>
+            </ol>
+          </div>
+          <div>
+            <div class="remark">
+              <div class="remark-title">Remark</div>
+              For every sufficiently small
+              $k>0$ and any prescribed $\epsilon>0$, there exists $\delta>0$
+              such that every trajectory of the original nonlinear closed-loop system
+              starting within $U_{\delta}$ remains inside $U_{\epsilon}$ for all
+              $\tau \geq \tau_0$. This observation indicates that the closed loop nonlinear
+              system stays close to the orbit $x_*$ while synchronization term
+              is converging.
+            </div>
+            <div class="remark">
+              <div class="remark-title">Remark</div>
+              No matter how much the robot is late, it moves a bit faster, staying within $U_\varepsilon$ and cutting off the corners.
+            </div>
+          </div>
         </div>
       </section>
 
