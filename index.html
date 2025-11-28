@@ -29,8 +29,6 @@
         <div class="body"></div>
         <div class="arm right"></div>
       </div>
-
-      <!-- <div style="width:1rem;height:1rem;border-radius:20%;background:rgba(11,18,32,0.9)"></div> -->
       <div>
         <div class="subtitle" id="slide-subtitle">##</div>
       </div>
@@ -61,7 +59,6 @@
               Trajectory Tracking in 
               <br>Underactuated Robots
             </h1>
-
             <div>
               <div style="font-size: 30pt; text-align: left; bottom: 0pt;">
                 Maksim Surov
@@ -77,7 +74,19 @@
 
           <div>
             <div class="video-frame">
-              <video src="media/butterfly-sliding-control.mp4" controls autoplay muted loop playsinline></video>
+              <!-- <video src="media/butterfly-sliding-control.mp4" controls autoplay muted loop playsinline></video> -->
+              <!-- <iframe
+                src="https://www.youtube.com/embed/v6cUUEJ9Aaw"
+                style="border:none;width:100%;aspect-ratio:16/9;"
+                allow="autoplay; fullscreen; encrypted-media"
+                allowfullscreen>
+              </iframe> -->
+              <iframe
+                src="https://rutube.ru/play/embed/33e4301d9e3e26f8748e18fab5f81f69/"
+                style="border:none;width:100%;aspect-ratio:16/9;"
+                allow="autoplay; fullscreen; encrypted-media"
+                allowfullscreen>
+              </iframe>
               <div class="video-credit">
                 <b>credits:</b> Maksim Surov
                 <a href="https://youtu.be/v6cUUEJ9Aaw">youtu.be/v6cUUEJ9Aaw</a>
@@ -85,7 +94,6 @@
             </div>
           </div>
         </div>
-
       </section>
 
       <section>
@@ -97,7 +105,6 @@
       <section data-title="The Butterfly Robot">
         <div class="cols" style="align-items: center;">
           <div style="flex: 1.2">
-
             <div class="comment">
               <div class="comment-title">The Butterfly<sup>*</sup> robot</div>
               provides a 2D simplification of the rolling manipulation problem.
@@ -107,7 +114,6 @@
                 <li>The ball rolls freely along the hand's surface.</li>
               </ul>
             </div>
-
             <div class="comment">
               <div class="comment-title">Robot components:</div>
               <ul>
@@ -116,7 +122,6 @@
                 <li>Camera measures ball Cartesian coordinates. </li>
               </ul>
             </div>
-
             <div class="comment">
               <div class="comment-title">Control objectives:</div>
               <ul>
@@ -126,7 +131,6 @@
               </ul>
             </div>
           </div>
-
           <div class="regular" style="flex: 1.08; margin: 0; padding: 0">
             <figure class="figure">
               <img src="media/butterfly-artwork.png"
@@ -137,7 +141,6 @@
               </figcaption>
             </figure>
           </div>
-
           <div class="regular" style="flex: 1.14; margin: 0; padding: 0;">
             <figure class="figure">
               <img src="media/reference-trajectory.gif"
@@ -147,11 +150,8 @@
                 Figure 2. Robot motion example.
               </figcaption>
             </figure>
-
           </div>
-
         </div>
-
         <div class="footnote" style="max-width: 60%">
           * The robot was invented by K. M. Lynch, et. al. in "The roles of shape and motion in dynamic manipulation: the butterfly example,"
           ICRA, 1998, pp. 1958-1963 vol. 3.
@@ -174,7 +174,6 @@
 
       <section data-title="Robot Kinematics">
         <div class="cols" style="align-items: center;">
-
           <div style="flex: 1">
             <div class="comment">
               <b><u>Assume</u></b> ideal rolling conditions:<br>
@@ -184,7 +183,6 @@
               </ul><br>
               Then the robot has 2 DOF. <br>
             </div>
-
             <div class="comment">
               Cartesian coordinate systems:<br>
               <ul>
@@ -192,10 +190,8 @@
                 <li>Frame attached to the robot link shares the same origin, and its axes $l_{x},l_{y}$ are rotated counterclockwise by the angle </li>
               </ul>
             </div>
-
             <div class="comment">
               Generalized coordinates:
-
               <table style="margin-left: 0;">
                 <tbody>
                   <tr>
@@ -209,11 +205,8 @@
                 </tbody>
               </table>
             </div>
-
           </div>
-
           <div style="flex: 1.3">
-
             <figure class="figure">
               <img src="media/generalized_coordinates.svg"
                    alt="Butterfly robot kinematics"
@@ -222,9 +215,7 @@
                 Figure 3. Butterfly robot kinematics
               </figcaption>
             </figure>
-
           </div>
-
           <div style="flex: 1">
             <table class="table">
               <thead class="theader">
@@ -257,7 +248,6 @@
               </tbody>
             </table>
           </div>
-
         </div>
       </section>
 
@@ -294,12 +284,10 @@
                 \left\vert f_t(q,\dot q, u) \right\vert < \kappa f_n(q,\dot q, u).
               \]
             </div>
-
             <div class="footnote">
               * The equation are published in M. Surov, et. al., "Case study in non-prehensile manipulation: planning and orbital stabilization of one-directional rollings for the “Butterfly” robot," 2015 ICRA, Seattle, WA, USA, 2015, pp. 1484-1489
             </div>
           </div>
-
           <div>
             <table class="table">
               <thead class="theader">
@@ -334,7 +322,6 @@
                 </tr>
               </tbody>
             </table>
-
             <table class="table">
               <thead class="theader">
                 <tr>
@@ -386,10 +373,8 @@
                 </tr>
               </tbody>
             </table>
-
           </div>
         </div>
-
       </section>
 
       <section data-title="Motion Planning Problem">
@@ -486,14 +471,11 @@
               * This solution to the motion planning problem is published in M. Surov, et. al., "Case study in non-prehensile manipulation: planning and orbital stabilization of one-directional rollings for the “Butterfly” robot," 2015 ICRA, Seattle, WA, USA, 2015, pp. 1484-1489
             </div>
           </div>
-
         </div>
       </section>
 
       <section data-title="Quasi-Periodic Trajectory">
-
         <div class="cols" style="max-width: 100rem; margin:0 auto;">
-
           <div style="flex: 1">
             <div>
               <div class="regular">
@@ -501,7 +483,6 @@
                 The coordinate $\varphi$ is strictly increasing, i.e., $\dot\varphi > 0$.
               </div>
             </div>
-
             <figure class="figure">
               <img src="media/reference-trajectory.gif"
                    alt="Reference quasi-periodic trajectory"
@@ -511,7 +492,6 @@
               </figcaption>
             </figure>
           </div>
-
           <div style="flex: 1.20">
             <figure class="figure">
               <img src="media/reference_trajectory.svg"
@@ -522,9 +502,7 @@
               </figcaption>
             </figure>
           </div>
-
         </div>
-
       </section>
 
       <section>
@@ -543,7 +521,6 @@
                 x_{*}=\left\{ x\in\mathbb{R}^{4}\mid x=x_{*}\left(t\right),\,t\in\mathbb{R}\right\}.
               \]
             </div>
-
             <div class="comment">
               <div class="comment-title"> Definition: tubular neighborhood </div>
               of the orbit $x_*$ is the set
@@ -639,7 +616,6 @@
               </div>
             </div>
           </div>
-          
           <div>
             <div class="fragment fade-in-then-semi-out">
               <div class="comment">
@@ -674,11 +650,9 @@
             </div>
           </div>
         </div>
-
         <div class="footnote" style="max-width: 70%;">
           [1] A. Shiriaev, et.al., "Constructive tool for orbital stabilization of underactuated nonlinear systems: virtual constraints approach," in IEEE TAC, vol. 50, no. 8, pp. 1164-1176, Aug. 2005.
         </div>
-
       </section>
 
       <section data-title="LQR Feedback Design">
@@ -722,10 +696,8 @@
       </section>
 
       <section data-title="Linearized Dynamics Properties">
-
         <div class="cols">
           <div style="flex: 1.5">
-
             <div class="remark">
               <div class="remark-title"> Proposition: </div>
               For any $k_{1},k_{2}>0$, the unforced $T$-periodic LTV system 
@@ -746,7 +718,6 @@
               \]
               The monodromy matrix $\Psi \equiv X(T)$ has (at least) two eigenvalues satisfying $|\mu_{1,2}| < 1$.
             </div>
-
             <div class="fragment fade-left">
               <div class="remark">
                 <div class="remark-title"> Corollary: </div>
@@ -760,7 +731,6 @@
               </div>
             </div>
           </div>
-
           <div>
             <div class="comment">
               <div class="comment-title"> Proof: </div>
@@ -784,7 +754,6 @@
               $$
               Since $k_{1},k_{2}>0$ and $T>0$, it follows that $\left|\mu_{1,2}\right|<1$.
             </div>
-
             <div class="fragment fade-left">
               <div class="alert">
                 The system behavior inside $\mathcal{S}_\tau$ is stable. We must design a feedback law $w(\tau,\bar\xi)$ that drives every trajectory originating outside $\mathcal{S}_\tau$ into it in finite time.
@@ -792,7 +761,6 @@
             </div>
           </div>
         </div>
-
       </section>
 
       <section data-title="Stable Subspace of an LTV System">
@@ -818,7 +786,6 @@
                   \]
                   using the classical fourth-order Runge-Kutta method.
                 </li>
-                
                 <li>
                   Since, the monodromy matrix $\Psi \equiv X(T)$ possesses two eigenvalues $\left|\mu_{1,2}\right| < 1$, three cases may occur:
                   <ul>
@@ -845,12 +812,9 @@
                   $$
                   is either $T$-periodic or $2T$-periodic.
                 </li>
-
               </ol>
-
             </div>
           </div>
-
           <div>
             <figure class="figure">
               <img src="media/stable_subspace.svg"
@@ -866,7 +830,6 @@
 
       <section data-title="Theorem: Feedback Design for Partially Stabilized Periodic LTV System">
         <div class="cols" style="margin-top: 1rem;">
-
           <div class="theorem">
             <p>
               Consider the LTV system
@@ -895,7 +858,6 @@
               renders the origin of the closed-loop system globally asymptotically stable.
             </p>
           </div>
-
           <div style="flex: 0.7">
             <table class="table">
               <thead class="theader">
@@ -939,17 +901,14 @@
             </div>
           </div>
         </div>
-
         <div class="footnote" style="bottom: -5rem; max-width: 60%;">
           * Theorem is forthcoming (currently under review) in M. Surov, "Sliding-mode-based control design for the Butterfly robot," IEEE TCST.
         </div>
-
       </section>
 
       <section data-title="Proof of Theorem">
         <div class="cols">
           <div class="comment" style="flex: 1.4">
-
             <ol>
               <li class="fragment fade-in-then-semi-out">
                 Show that all trajectories converge to $\mathcal{S}_t$ in finite time. Evolution of the scalar variable $z = n^{\top}\left(\tau\right)\bar\xi$, which represents the signed distance from $\bar\xi$ to $\mathcal{S}_{\tau}$, is
@@ -957,7 +916,6 @@
                   \frac{dz}{d\tau} = -k_3\,\mathrm{sign}(z).
                 $$
               </li>
-
               <li class="fragment fade-in-then-semi-out">
                 Sliding surface:
                 \[
@@ -980,7 +938,6 @@
             </ol>
             <br>
           </div>
-
           <div>
             <figure class="figure">
               <img src="media/invariant-subspace.svg"
@@ -992,11 +949,9 @@
             </figure>
           </div>
         </div>
-
         <div class="footnote" style="max-width: 60%">
           * The full proof is forthcoming (currently under review) in M. Surov, "Sliding-Mode-Based Control Design for the Butterfly Robot," IEEE TCST.
         </div>
-
       </section>
 
       <section data-title="Nonlinear Control">
@@ -1038,13 +993,23 @@
           \]
           The design parameters $k_1, k_2, k_3 > 0$.
         </div>
-
       </section>
 
       <section data-title="Experimental Results" data-background-gradient="radial-gradient(0, #333)">
         <div class="video-frame">
-          <video src="media/butterfly-sliding-control.mp4" controls autoplay muted loop playsinline class="video">
-          </video>
+          <!-- <video src="media/butterfly-sliding-control.mp4" controls autoplay muted loop playsinline class="video"></video> -->
+          <!-- <iframe
+            src="https://youtu.be/v6cUUEJ9Aaw"
+            style="border:none;width:100%;aspect-ratio:16/9;"
+            allow="autoplay; fullscreen; encrypted-media"
+            allowfullscreen>
+          </iframe> -->
+          <iframe
+            src="https://rutube.ru/play/embed/33e4301d9e3e26f8748e18fab5f81f69/"
+            style="border:none;width:100%;aspect-ratio:16/9;"
+            allow="autoplay; fullscreen; encrypted-media"
+            allowfullscreen>
+          </iframe>
           <div class="video-credit">
             <b>credits:</b> Maksim Surov
             <a href="https://youtu.be/v6cUUEJ9Aaw">youtu.be/v6cUUEJ9Aaw</a>
@@ -1184,8 +1149,19 @@
 
       <section data-title="Butterfly Robot Periodic Motion" data-background-gradient="radial-gradient(#000, #333)">
         <div class="video-frame">
-          <video src="media/forth-and-back.mp4" controls autoplay muted loop playsinline class="video">
-          </video>
+          <!-- <video src="media/forth-and-back.mp4" controls autoplay muted loop playsinline class="video"></video> -->
+          <!-- <iframe
+            src="https://youtu.be/hx9mxDxHBB0"
+            style="border:none;width:100%;aspect-ratio:16/9;"
+            allow="autoplay; fullscreen; encrypted-media"
+            allowfullscreen>
+          </iframe> -->
+          <iframe
+            src="https://rutube.ru/play/embed/2bec3836327633d4b6856083d5268917/"
+            style="border:none;width:100%;aspect-ratio:16/9;"
+            allow="autoplay; fullscreen; encrypted-media"
+            allowfullscreen>
+          </iframe>
           <div class="video-credit">
             <b>credits:</b> Maksim Surov
             <a href="https://youtu.be/hx9mxDxHBB0">youtu.be/hx9mxDxHBB0</a>
@@ -1206,7 +1182,6 @@
                 m &:= \inf_{\tau\in\left[\tau_{0},\tau_{0}+T\right]}\int_{\tau_{o}}^{\tau}k_{4}n^{\top}B\,\sigma\left(n^{\top}B\right)-n^{\top}A\,n\,dv \in\mathbb{R} \\
                 d &:= \int_{0}^{T}n^{\top}B\,\sigma\left(n^{\top}B\right)dv > 0
               \end{aligned}$$
-
               While $z$ converges over an interval, its dynamics may become uncontrollable on small intervals where $n^\top B$ is close to zero:
               $$\begin{aligned}
                 \frac{dz}{d\tau}&=\left(n^{\top}A\,n-\underbrace{k_{4}n^{\top}B\,\sigma\left(n^{\top}B\right)}_{\text{vanishes}}\right)z \\[6pt]
@@ -1215,7 +1190,6 @@
               \end{aligned}$$
             </div>
           </div>
-
           <div style="flex: 1; margin-left: -1rem;">
             <figure class="figure">
               <img src="media/forth_and_back_stable_subspace.svg"
@@ -1229,7 +1203,6 @@
               At low speeds, friction becomes significant, causing the ball to get stuck for $\tau$ near $0$ and $\pi$.
             </div>
           </div>
-
           <div style="flex: 1">
             <figure class="figure">
               <img src="media/forth_and_back_control_vanishing.svg"
@@ -1240,9 +1213,7 @@
         </div>
       </section>
 
-
       <section data-title="Remark: Generaliztion for n-DOF Systems win n-1 controls">
-
         <div class="cols">
           <div>
             <div class="comment">
@@ -1303,34 +1274,34 @@
       </section>
 
       <section data-title="Time Synchronization">
-          <div style="max-width: 60%">
-            <div class="comment">
-              The orbital asymptotic stability:
-              $$\mathrm{dist}(x(t), x_*) \to 0 \quad\text{as}\quad t \to \infty$$
-              The (usual) asymptotic stability
-              $$
-                \Vert x(t) - x_*(t) \Vert \to 0 \quad\text{as}\quad t \to \infty
-              $$
-            </div>
-            <div class="comment">
-              The transverse linearization based control establishes orbital stability only:
-              <br>
-              <ul>
-                <li>In theory
-                  \[
-                    \Vert x(t) - x_*(t) \Vert \to \mathrm{const} \quad \text{as} \quad t \to \infty.
-                  \]
-                </li>
-                <li>In practice $x(t)$ and $x_*(t)$ drift apart.
-                </li>
-              </ul>
-            </div>
-            <div class="fragment fade-left">
-              <div class="alert">
-                Can we modify the transverse linearization approach to achieve asymptotic stability?
-              </div>
+        <div style="max-width: 60%">
+          <div class="comment">
+            The orbital asymptotic stability:
+            $$\mathrm{dist}(x(t), x_*) \to 0 \quad\text{as}\quad t \to \infty$$
+            The (usual) asymptotic stability
+            $$
+              \Vert x(t) - x_*(t) \Vert \to 0 \quad\text{as}\quad t \to \infty
+            $$
+          </div>
+          <div class="comment">
+            The transverse linearization based control establishes orbital stability only:
+            <br>
+            <ul>
+              <li>In theory
+                \[
+                  \Vert x(t) - x_*(t) \Vert \to \mathrm{const} \quad \text{as} \quad t \to \infty.
+                \]
+              </li>
+              <li>In practice $x(t)$ and $x_*(t)$ drift apart.
+              </li>
+            </ul>
+          </div>
+          <div class="fragment fade-left">
+            <div class="alert">
+              Can we modify the transverse linearization approach to achieve asymptotic stability?
             </div>
           </div>
+        </div>
       </section>
 
       <section data-title="Transverse Linearization Scheme">
@@ -1583,7 +1554,6 @@
             </ol>
           </div>
         </div>
-
         <div class="footnote" style="max-width: 60%">
           The result is published in the preprint M. Surov, "Orbital Stabilization and Time Synchronization of Unstable Periodic Motions in Underactuated Robots", 2025, arxiv.org/abs/2509.20082.
         </div>
@@ -1652,15 +1622,25 @@
 
       <section data-title="Decentralized Synchronization of Six Robots" data-background-gradient="radial-gradient(#000, #333)">
         <div class="video-frame">
-          <video src="media/sync-butterfly-presentation.mp4" controls autoplay muted loop playsinline class="video">
-          </video>
+          <!-- <video src="media/sync-butterfly-presentation.mp4" controls autoplay muted loop playsinline class="video"></video> -->
+          <!-- <iframe
+            src="https://youtu.be/WtvYQWtRSiw"
+            style="border:none;width:100%;aspect-ratio:16/9;"
+            allow="autoplay; fullscreen; encrypted-media"
+            allowfullscreen>
+          </iframe> -->
+          <iframe
+            src="https://rutube.ru/play/embed/7ef67e6fd8b85eaa50731cfbe837ad5d"
+            style="border:none;width:100%;aspect-ratio:16/9;"
+            allow="autoplay; fullscreen; encrypted-media"
+            allowfullscreen>
+          </iframe>
           <div class="video-credit">
             <b>credits:</b> Maksim Grigorov, Maksim Surov
             <a href="https://youtu.be/WtvYQWtRSiw">youtu.be/WtvYQWtRSiw</a>
           </div>
         </div>
       </section>
-
     </div>
   </div>
 
